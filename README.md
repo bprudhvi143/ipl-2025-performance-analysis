@@ -37,15 +37,18 @@ into team and player performances.
 📸 Sample Visualizations
 
 Strike Rate Distribution
-![Strike Rate Distribution]<img width="419" height="214" alt="ipl2025_analysis" src="https://github.com/user-attachments/assets/fe6a142f-0afe-4034-bd06-57f8f9361876" />
+
+<img width="419" height="214" alt="ipl2025_analysis" src="https://github.com/user-attachments/assets/fe6a142f-0afe-4034-bd06-57f8f9361876" />
 
 
-Top 10 Batsmen by Runs<img width="419" height="214" alt="ipl2025_bat_perf" src="https://github.com/user-attachments/assets/5aa9ef58-4080-4893-800b-83290d4af768" />
+Top 10 Batsmen by Runs
 
-![Top Batsmen]
+<img width="419" height="214" alt="ipl2025_bat_perf" src="https://github.com/user-attachments/assets/5aa9ef58-4080-4893-800b-83290d4af768" />
+
 
 Top 10 Bowlers by Wickets
-![Top Bowlers]<img width="419" height="214" alt="ipl2025_bowl_perf" src="https://github.com/user-attachments/assets/35f5bd3a-9319-4069-a956-5d92c6251fff" />
+
+<img width="419" height="214" alt="ipl2025_bowl_perf" src="https://github.com/user-attachments/assets/35f5bd3a-9319-4069-a956-5d92c6251fff" />
 
 
 ---
