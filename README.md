@@ -97,20 +97,21 @@ The platform adheres strictly to official cricket laws and analytical standards:
 
 ## 🎨 Official IPL Brand Design System & Color Palette
 
-Designed using the official IPL logo color identity:
+Designed using the official IPL logo color identity and high-contrast, luminous visual elements on a blended stadium canvas:
 
 | UI Component | Hex Code | Visual Sample & Description |
 | :--- | :--- | :--- |
-| **IPL Electric Swoosh Blue** | `#0090DF` | Dynamic curved stroke from the official IPL logo |
-| **IPL Royal Navy Blue** | `#1D428A` | Powerful batsman silhouette blue |
-| **IPL Trophy Gold** | `#FFB800` | Golden champions highlight and secondary accent |
-| **Main Canvas Background** | `#0A101D` | Deep Midnight IPL Stadium Navy |
+| **IPL Electric Swoosh Blue** | `#0090DF` / `#38BDF8` | Dynamic curved stroke from the official IPL logo; luminous chart series |
+| **IPL Royal Navy Blue** | `#1D428A` | Powerful batsman silhouette blue framing topbar and brand shell |
+| **IPL Trophy Gold** | `#FFB800` / `#FDE047` | Golden champions highlight, milestone accents, and comparison markers |
+| **Main Canvas Background** | `#0B111E` | Deep Midnight IPL Stadium Navy |
 | **Sidebar Navigation** | `#0E1726` | Deep Slate Navy |
-| **Card Surface** | `#152238` | Midnight Blue analytical card |
-| **Elevated Card Surface** | `#1C2E4C` | Interactive hover & active container |
-| **Borders & Dividers** | `#253B5C` | Crisp navy border containment |
-| **Primary Typography** | `#FFFFFF` | Inter / High-contrast white |
-| **Official Logo** | `www/ipl_logo.png` | Official IPL Batsman icon integrated in sidebar & topbar |
+| **Card Surface (Blended)** | `#141E33` | Blended dark analytical card surface with transparent chart plotting canvas |
+| **Luminous Visual Elements** | Multi-Accent | Lighter pastel/electric bars, circles, and donut slices (`#38BDF8`, `#FDE047`, `#4ADE80`, `#FB7185`, `#67E8F9`) |
+| **Borders & Dividers** | `#233554` | Crisp navy border containment |
+| **Primary Typography** | `#FFFFFF` / `#F8FAFC` | Inter / High-contrast white and soft slate silver (`#94A3B8`) |
+| **Official Franchise Crests** | `www/teams/*.png` | Authentic PNG crests for all 10 franchises integrated into tables, banners, and player cards |
+| **Official Tournament Logo** | `www/ipl_logo.png` | Official IPL Batsman icon integrated in sidebar & topbar |
 
 ---
 

@@ -131,27 +131,45 @@ team_summary <- full_join(team_batting_summary, team_bowling_summary, by = c("ba
   ) %>%
   arrange(desc(runs_scored))
 
-# Franchise Color Map for IPL Teams
+# Franchise Color Map for IPL Teams (Lighter, Vibrant, High-Contrast Palette)
 team_colors <- c(
-  "CSK"  = "#FACC15",
-  "DC"   = "#2563EB",
-  "GT"   = "#0EA5E9",
-  "KKR"  = "#7C3AED",
-  "LSG"  = "#00A3E0",
-  "MI"   = "#004BA0",
-  "PBKS" = "#DC2626",
-  "RCB"  = "#B91C1C",
-  "RR"   = "#EC4899",
-  "SRH"  = "#EA580C"
+  "CSK"  = "#FDE047", # Bright Light Gold
+  "DC"   = "#38BDF8", # Light Sky Blue
+  "GT"   = "#2DD4BF", # Light Mint Teal
+  "KKR"  = "#C084FC", # Light Vivid Purple
+  "LSG"  = "#67E8F9", # Light Crisp Cyan
+  "MI"   = "#60A5FA", # Light Vibrant Blue
+  "PBKS" = "#FB7185", # Light Rose Crimson
+  "RCB"  = "#F87171", # Light Bright Coral Red
+  "RR"   = "#F472B6", # Light Bright Pink
+  "SRH"  = "#FB923C"  # Light Bright Orange
 )
 
-# Team Logo HTML Helper for DataTables and UI
-team_logo_html <- function(team_code, size = 20) {
-  if (is.na(team_code) || team_code == "") return("—")
-  tc <- tolower(trimws(team_code))
+# Team Logo Resolver Helper (Checks PNG images in www/ and www/teams/)
+get_team_logo_path <- function(team_code) {
+  if (is.na(team_code) || is.null(team_code) || team_code == "") return(NULL)
+  tc <- tolower(trimws(as.character(team_code)))
   first_team <- tolower(trimws(strsplit(tc, ",")[[1]][1]))
-  svg_path <- paste0("teams/", first_team, ".svg")
-  paste0("<span class='team-badge-wrap'><img src='", svg_path, "' class='team-logo-icon' style='width:", size, "px; height:", size, "px;' alt='", team_code, "' /> <span class='team-code-text'>", team_code, "</span></span>")
+  
+  if (file.exists(file.path("www", "teams", paste0(first_team, ".png")))) {
+    return(paste0("teams/", first_team, ".png"))
+  } else if (file.exists(file.path("www", paste0(first_team, ".png")))) {
+    return(paste0(first_team, ".png"))
+  } else if (file.exists(file.path("www", "teams", paste0(first_team, ".svg")))) {
+    return(paste0("teams/", first_team, ".svg"))
+  }
+  return(NULL)
+}
+
+# Team Logo HTML Helper for DataTables and UI
+team_logo_html <- function(team_code, size = 22) {
+  if (is.na(team_code) || is.null(team_code) || team_code == "") return("—")
+  img_src <- get_team_logo_path(team_code)
+  if (!is.null(img_src)) {
+    paste0("<span class='team-badge-wrap'><img src='", img_src, "' class='team-logo-icon' style='width:", size, "px; height:", size, "px; object-fit: contain; vertical-align: middle;' alt='", team_code, "' /> <span class='team-code-text'>", team_code, "</span></span>")
+  } else {
+    paste0("<span class='team-code-text'>", team_code, "</span>")
+  }
 }
 
 # All unique players for search/dropdowns
@@ -168,40 +186,42 @@ normalize_metric <- function(val, min_val, max_val, invert = FALSE) {
   pmin(100, pmax(0, round(norm, 1)))
 }
 
-# Light, Attractive, Uncongested Plotly layout template
+# Blended, High-Contrast Plotly layout template with Luminous Elements
 light_plotly_layout <- function(p, title = "", showlegend = TRUE) {
   p %>%
     layout(
       title = list(
         text = title,
-        font = list(color = "#0F172A", size = 14, family = "Inter, sans-serif")
+        font = list(color = "#F8FAFC", size = 14, family = "Inter, sans-serif")
       ),
-      paper_bgcolor = "#FFFFFF",
-      plot_bgcolor = "#F8FAFC",
-      font = list(color = "#475569", family = "Inter, sans-serif", size = 11),
+      paper_bgcolor = "rgba(0,0,0,0)",
+      plot_bgcolor = "rgba(0,0,0,0)",
+      font = list(color = "#CBD5E1", family = "Inter, sans-serif", size = 11),
       showlegend = showlegend,
       legend = list(
-        font = list(color = "#1E293B", size = 11),
-        bgcolor = "rgba(255, 255, 255, 0.95)",
-        bordercolor = "#E2E8F0",
+        font = list(color = "#F8FAFC", size = 11),
+        bgcolor = "rgba(16, 27, 46, 0.85)",
+        bordercolor = "rgba(255, 255, 255, 0.12)",
         borderwidth = 1
       ),
       margin = list(l = 55, r = 30, t = 45, b = 55),
       bargap = 0.35, # Generous spacing between bars - NOT congested!
       hoverlabel = list(
-        bgcolor = "#0F172A",
-        bordercolor = "#0090DF",
+        bgcolor = "#0B111E",
+        bordercolor = "#38BDF8",
         font = list(color = "#FFFFFF", family = "Inter, sans-serif")
       ),
       xaxis = list(
-        gridcolor = "#F1F5F9",
-        zerolinecolor = "#CBD5E1",
-        tickfont = list(color = "#334155", size = 11)
+        gridcolor = "rgba(255, 255, 255, 0.08)",
+        zerolinecolor = "rgba(255, 255, 255, 0.15)",
+        tickfont = list(color = "#94A3B8", size = 11),
+        titlefont = list(color = "#E2E8F0", size = 12)
       ),
       yaxis = list(
-        gridcolor = "#E2E8F0",
-        zerolinecolor = "#CBD5E1",
-        tickfont = list(color = "#334155", size = 11)
+        gridcolor = "rgba(255, 255, 255, 0.08)",
+        zerolinecolor = "rgba(255, 255, 255, 0.15)",
+        tickfont = list(color = "#94A3B8", size = 11),
+        titlefont = list(color = "#E2E8F0", size = 12)
       )
     ) %>%
     config(displayModeBar = FALSE, responsive = TRUE)
@@ -738,7 +758,7 @@ server <- function(input, output, session) {
   # PAGE 1: OVERVIEW SERVER OUTPUTS
   # ============================================================================
   
-  # Overview Chart A: Runs Distribution by Innings & Phase (Bright & Spacious)
+  # Overview Chart A: Runs Distribution by Innings & Phase (Lighter Colors & High Contrast)
   output$plot_overview_runs_dist <- renderPlotly({
     phase_data <- ipl %>%
       filter(innings %in% c(1, 2)) %>%
@@ -754,9 +774,9 @@ server <- function(input, output, session) {
       x = ~over_phase,
       y = ~runs,
       color = ~innings_label,
-      colors = c("#0090DF", "#F59E0B"),
+      colors = c("#38BDF8", "#FDE047"), # Lighter Sky Cyan and Lighter Sun Gold
       type = "bar",
-      marker = list(line = list(color = "#FFFFFF", width = 1.5))
+      marker = list(line = list(color = "rgba(255, 255, 255, 0.25)", width = 1))
     ) %>%
       layout(
         barmode = "group",
@@ -767,7 +787,7 @@ server <- function(input, output, session) {
     light_plotly_layout(p, title = "")
   })
   
-  # Overview Chart B: Franchise Total Runs Horizontal Bar (With Franchise Colors)
+  # Overview Chart B: Franchise Total Runs Horizontal Bar (With Lighter Franchise Colors)
   output$plot_overview_team_scoring <- renderPlotly({
     team_data <- team_summary %>%
       arrange(runs_scored) %>%
@@ -777,11 +797,12 @@ server <- function(input, output, session) {
       data = team_data,
       x = ~runs_scored,
       y = ~team,
+      color = ~team,
+      colors = team_colors,
       type = "bar",
       orientation = "h",
       marker = list(
-        color = "#0090DF",
-        line = list(color = "#0284C7", width = 1)
+        line = list(color = "rgba(255, 255, 255, 0.25)", width = 1)
       ),
       hovertemplate = "<b>%{y}</b><br>Total Runs: %{x}<br>Matches: %{customdata[0]}<br>Run Rate: %{customdata[1]}<extra></extra>",
       customdata = cbind(team_data$matches, team_data$run_rate)
@@ -923,7 +944,7 @@ server <- function(input, output, session) {
             div(class = "kpi-value", format(p_bat$runs, big.mark = ",")),
             div(
               class = "kpi-subtitle",
-              tags$img(src = paste0("teams/", p_team_code, ".svg"), style = "width: 14px; height: 14px; vertical-align: middle; margin-right: 4px;"),
+              if (!is.null(get_team_logo_path(p_team_code))) tags$img(src = get_team_logo_path(p_team_code), class = "team-logo-icon", style = "width: 18px; height: 18px; vertical-align: middle; margin-right: 6px;"),
               paste("Franchise:", p_bat$teams)
             )
           ),
@@ -1086,7 +1107,11 @@ server <- function(input, output, session) {
             class = "kpi-card kpi-purple",
             div(class = "kpi-header", span(class = "kpi-title", "Total Wickets"), div(class = "kpi-icon-wrap", "🎯")),
             div(class = "kpi-value", p_bowl$wickets),
-            div(class = "kpi-subtitle", "Bowler credited wickets")
+            div(
+              class = "kpi-subtitle",
+              if (!is.null(get_team_logo_path(p_team_code))) tags$img(src = get_team_logo_path(p_team_code), class = "team-logo-icon", style = "width: 18px; height: 18px; vertical-align: middle; margin-right: 6px;"),
+              paste("Franchise:", p_bowl$teams)
+            )
           ),
           div(
             class = "kpi-card kpi-primary",
@@ -1219,7 +1244,7 @@ server <- function(input, output, session) {
     }
   })
   
-  # Player Batting Charts (Luminous & Eye-Catching)
+  # Player Batting Charts (Luminous & Eye-Catching Lighter Elements)
   output$plot_player_bat_match_trend <- renderPlotly({
     req(input$player_select)
     p_data <- ipl %>%
@@ -1240,7 +1265,7 @@ server <- function(input, output, session) {
         x = ~match_label,
         y = ~runs,
         name = "Runs Scored",
-        marker = list(color = "#0090DF", line = list(color = "#0284C7", width = 1))
+        marker = list(color = "#38BDF8", line = list(color = "#7DD3FC", width = 1))
       ) %>%
       add_trace(
         type = "scatter",
@@ -1248,8 +1273,8 @@ server <- function(input, output, session) {
         x = ~match_label,
         y = ~balls,
         name = "Balls Faced",
-        line = list(color = "#F59E0B", width = 2.5),
-        marker = list(color = "#F59E0B", size = 7)
+        line = list(color = "#FDE047", width = 2.5),
+        marker = list(color = "#FDE047", size = 8)
       ) %>%
       layout(
         xaxis = list(title = "Match (Opponent)"),
@@ -1279,13 +1304,23 @@ server <- function(input, output, session) {
       values = ~runs,
       type = "pie",
       hole = 0.55,
-      marker = list(colors = c("#0090DF", "#1D428A", "#F59E0B")),
-      textinfo = "label+percent"
+      marker = list(
+        colors = c("#38BDF8", "#FDE047", "#4ADE80"),
+        line = list(color = "#141E33", width = 2)
+      ),
+      textinfo = "label+percent",
+      textfont = list(color = "#FFFFFF", size = 11, family = "Inter, sans-serif")
     ) %>%
       layout(
-        paper_bgcolor = "#FFFFFF",
-        font = list(color = "#1E293B", family = "Inter, sans-serif"),
-        showlegend = TRUE
+        paper_bgcolor = "rgba(0,0,0,0)",
+        plot_bgcolor = "rgba(0,0,0,0)",
+        font = list(color = "#CBD5E1", family = "Inter, sans-serif"),
+        showlegend = TRUE,
+        legend = list(
+          font = list(color = "#F8FAFC", size = 11),
+          bgcolor = "rgba(16, 27, 46, 0.85)",
+          bordercolor = "rgba(255, 255, 255, 0.12)"
+        )
       )
     
     light_plotly_layout(p, title = "")
@@ -1310,9 +1345,10 @@ server <- function(input, output, session) {
       y = ~runs,
       type = "bar",
       name = "Runs",
-      marker = list(color = "#0090DF", line = list(color = "#0284C7", width = 1)),
+      marker = list(color = "#38BDF8", line = list(color = "#7DD3FC", width = 1)),
       text = ~paste("SR:", strike_rate),
-      textposition = "auto"
+      textposition = "auto",
+      textfont = list(color = "#FFFFFF", size = 11)
     ) %>%
       layout(
         xaxis = list(title = ""),
@@ -1340,9 +1376,10 @@ server <- function(input, output, session) {
       x = ~over_phase,
       y = ~runs,
       type = "bar",
-      marker = list(color = "#38BDF8", line = list(color = "#0284C7", width = 1)),
+      marker = list(color = "#67E8F9", line = list(color = "#A5F3FC", width = 1)),
       text = ~paste("SR:", strike_rate),
-      textposition = "auto"
+      textposition = "auto",
+      textfont = list(color = "#FFFFFF", size = 11)
     ) %>%
       layout(
         xaxis = list(title = "Match Phase"),
@@ -1395,7 +1432,7 @@ server <- function(input, output, session) {
     )
   })
   
-  # Player Bowling Charts
+  # Player Bowling Charts (Luminous & Eye-Catching Lighter Elements)
   output$plot_player_bowl_match_trend <- renderPlotly({
     req(input$player_select)
     b_data <- ipl %>%
@@ -1415,7 +1452,7 @@ server <- function(input, output, session) {
         x = ~match_label,
         y = ~wickets,
         name = "Wickets",
-        marker = list(color = "#10B981")
+        marker = list(color = "#4ADE80", line = list(color = "#86EFAC", width = 1))
       ) %>%
       add_trace(
         type = "scatter",
@@ -1424,13 +1461,13 @@ server <- function(input, output, session) {
         y = ~runs,
         name = "Runs Conceded",
         yaxis = "y2",
-        line = list(color = "#EF4444", width = 2),
-        marker = list(color = "#EF4444", size = 6)
+        line = list(color = "#FB7185", width = 2.5),
+        marker = list(color = "#FB7185", size = 7)
       ) %>%
       layout(
         xaxis = list(title = "Match (Opponent)"),
         yaxis = list(title = "Wickets Taken", side = "left"),
-        yaxis2 = list(title = "Runs Conceded", overlaying = "y", side = "right", showgrid = FALSE)
+        yaxis2 = list(title = "Runs Conceded", overlaying = "y", side = "right", showgrid = FALSE, tickfont = list(color = "#FB7185"), titlefont = list(color = "#FB7185"))
       )
     
     light_plotly_layout(p, title = "")
@@ -1459,14 +1496,14 @@ server <- function(input, output, session) {
         x = ~match_label,
         y = ~economy,
         name = "Economy Rate",
-        line = list(color = "#0090DF", width = 2.5),
-        marker = list(color = "#0090DF", size = 6)
+        line = list(color = "#38BDF8", width = 2.5),
+        marker = list(color = "#38BDF8", size = 7)
       ) %>%
       add_lines(
         x = ~match_label,
         y = 8.5,
         name = "Benchmark (8.5)",
-        line = list(color = "#F59E0B", dash = "dash", width = 1.5)
+        line = list(color = "#FDE047", dash = "dash", width = 2)
       ) %>%
       layout(
         xaxis = list(title = "Match"),
@@ -1495,9 +1532,10 @@ server <- function(input, output, session) {
       x = ~innings_label,
       y = ~wickets,
       type = "bar",
-      marker = list(color = "#0090DF"),
+      marker = list(color = "#38BDF8", line = list(color = "#7DD3FC", width = 1)),
       text = ~paste("Econ:", economy),
-      textposition = "auto"
+      textposition = "auto",
+      textfont = list(color = "#FFFFFF", size = 11)
     ) %>%
       layout(
         xaxis = list(title = ""),
@@ -1526,9 +1564,10 @@ server <- function(input, output, session) {
       x = ~over_phase,
       y = ~wickets,
       type = "bar",
-      marker = list(color = "#10B981"),
+      marker = list(color = "#4ADE80", line = list(color = "#86EFAC", width = 1)),
       text = ~paste("Econ:", economy),
-      textposition = "auto"
+      textposition = "auto",
+      textfont = list(color = "#FFFFFF", size = 11)
     ) %>%
       layout(
         xaxis = list(title = "Match Phase"),
@@ -1593,10 +1632,10 @@ server <- function(input, output, session) {
     tm_lower <- tolower(tm)
     
     tagList(
-      # Franchise Brand Header Banner
+      # Franchise Brand Header Banner (Using Authentic PNG Logo from www)
       div(
         class = "team-header-banner",
-        tags$img(src = paste0("teams/", tm_lower, ".svg"), class = "team-header-logo", alt = tm),
+        if (!is.null(get_team_logo_path(tm))) tags$img(src = get_team_logo_path(tm), class = "team-header-logo", alt = tm),
         div(
           div(style = "font-size: 1.3rem; font-weight: 800; color: #FFFFFF;", paste(tm, "Franchise Intelligence")),
           div(style = "font-size: 0.82rem; color: #94A3B8;", "Season 2025 Performance • Official Squad Analytics & Phase Progression")
@@ -1648,13 +1687,13 @@ server <- function(input, output, session) {
       add_bars(
         x = ~match_label,
         y = ~runs,
-        marker = list(color = "#0090DF"),
+        marker = list(color = "#38BDF8", line = list(color = "#7DD3FC", width = 1)),
         name = "Runs"
       ) %>%
       add_lines(
         x = ~match_label,
         y = mean(match_data$runs),
-        line = list(color = "#F59E0B", dash = "dash", width = 2),
+        line = list(color = "#FDE047", dash = "dash", width = 2),
         name = "Team Average"
       ) %>%
       layout(
@@ -1681,7 +1720,7 @@ server <- function(input, output, session) {
       y = ~runs,
       type = "bar",
       name = "Runs Scored",
-      marker = list(color = "#0090DF")
+      marker = list(color = "#38BDF8", line = list(color = "#7DD3FC", width = 1))
     ) %>%
       layout(
         xaxis = list(title = ""),
@@ -1711,9 +1750,10 @@ server <- function(input, output, session) {
       x = ~over_phase,
       y = ~runs,
       type = "bar",
-      marker = list(color = "#38BDF8"),
+      marker = list(color = "#67E8F9", line = list(color = "#A5F3FC", width = 1)),
       text = ~paste("RR:", run_rate),
-      textposition = "auto"
+      textposition = "auto",
+      textfont = list(color = "#FFFFFF", size = 11)
     ) %>%
       layout(
         xaxis = list(title = ""),
@@ -1742,7 +1782,10 @@ server <- function(input, output, session) {
       x = ~over_phase,
       y = ~wickets,
       type = "bar",
-      marker = list(color = "#10B981")
+      marker = list(color = "#4ADE80", line = list(color = "#86EFAC", width = 1)),
+      text = ~paste("Wkts:", wickets),
+      textposition = "auto",
+      textfont = list(color = "#FFFFFF", size = 11)
     ) %>%
       layout(
         xaxis = list(title = ""),
@@ -1904,9 +1947,9 @@ server <- function(input, output, session) {
             if (wins_a > wins_b) span(class = "leader-pill", "🏆 DUEL LEADER"),
             div(
               class = "player-card-header-row",
-              if (file.exists(paste0("www/teams/", first_team_a, ".svg"))) tags$img(src = paste0("teams/", first_team_a, ".svg"), class = "player-card-team-logo") else NULL,
+              if (!is.null(get_team_logo_path(team_a))) tags$img(src = get_team_logo_path(team_a), class = "player-card-team-logo", alt = team_a) else NULL,
               div(
-                tags$h3(style = "color: #0090DF; margin: 0;", p_a),
+                tags$h3(style = "color: #38BDF8; margin: 0;", p_a),
                 tags$p(style = "color: #94A3B8; font-size: 0.85rem; margin: 2px 0 0 0;", paste("Franchise:", team_a))
               )
             ),
@@ -1926,9 +1969,9 @@ server <- function(input, output, session) {
             if (wins_b > wins_a) span(class = "leader-pill", "🏆 DUEL LEADER"),
             div(
               class = "player-card-header-row",
-              if (file.exists(paste0("www/teams/", first_team_b, ".svg"))) tags$img(src = paste0("teams/", first_team_b, ".svg"), class = "player-card-team-logo") else NULL,
+              if (!is.null(get_team_logo_path(team_b))) tags$img(src = get_team_logo_path(team_b), class = "player-card-team-logo", alt = team_b) else NULL,
               div(
-                tags$h3(style = "color: #FFB800; margin: 0;", p_b),
+                tags$h3(style = "color: #FDE047; margin: 0;", p_b),
                 tags$p(style = "color: #94A3B8; font-size: 0.85rem; margin: 2px 0 0 0;", paste("Franchise:", team_b))
               )
             ),
@@ -2031,9 +2074,9 @@ server <- function(input, output, session) {
             if (w_a > w_b) span(class = "leader-pill", "🏆 DUEL LEADER"),
             div(
               class = "player-card-header-row",
-              if (file.exists(paste0("www/teams/", first_team_a, ".svg"))) tags$img(src = paste0("teams/", first_team_a, ".svg"), class = "player-card-team-logo") else NULL,
+              if (!is.null(get_team_logo_path(team_a))) tags$img(src = get_team_logo_path(team_a), class = "player-card-team-logo", alt = team_a) else NULL,
               div(
-                tags$h3(style = "color: #0090DF; margin: 0;", p_a),
+                tags$h3(style = "color: #38BDF8; margin: 0;", p_a),
                 tags$p(style = "color: #94A3B8; font-size: 0.85rem; margin: 2px 0 0 0;", paste("Franchise:", team_a))
               )
             ),
@@ -2053,9 +2096,9 @@ server <- function(input, output, session) {
             if (w_b > w_a) span(class = "leader-pill", "🏆 DUEL LEADER"),
             div(
               class = "player-card-header-row",
-              if (file.exists(paste0("www/teams/", first_team_b, ".svg"))) tags$img(src = paste0("teams/", first_team_b, ".svg"), class = "player-card-team-logo") else NULL,
+              if (!is.null(get_team_logo_path(team_b))) tags$img(src = get_team_logo_path(team_b), class = "player-card-team-logo", alt = team_b) else NULL,
               div(
-                tags$h3(style = "color: #FFB800; margin: 0;", p_b),
+                tags$h3(style = "color: #FDE047; margin: 0;", p_b),
                 tags$p(style = "color: #94A3B8; font-size: 0.85rem; margin: 2px 0 0 0;", paste("Franchise:", team_b))
               )
             ),
@@ -2214,9 +2257,9 @@ server <- function(input, output, session) {
         mode = "lines+markers",
         text = c(hover_a, hover_a[1]),
         hoverinfo = "text",
-        line = list(color = "#0090DF", width = 2.8),
-        marker = list(color = "#0090DF", size = 7),
-        fillcolor = "rgba(0, 144, 223, 0.22)"
+        line = list(color = "#38BDF8", width = 3),
+        marker = list(color = "#38BDF8", size = 8),
+        fillcolor = "rgba(56, 189, 248, 0.28)"
       ) %>%
       add_trace(
         r = c(norm_b, norm_b[1]),
@@ -2225,36 +2268,37 @@ server <- function(input, output, session) {
         mode = "lines+markers",
         text = c(hover_b, hover_b[1]),
         hoverinfo = "text",
-        line = list(color = "#F59E0B", width = 2.8),
-        marker = list(color = "#F59E0B", size = 7),
-        fillcolor = "rgba(245, 158, 11, 0.22)"
+        line = list(color = "#FDE047", width = 3),
+        marker = list(color = "#FDE047", size = 8),
+        fillcolor = "rgba(253, 224, 71, 0.28)"
       ) %>%
       layout(
         polar = list(
-          bgcolor = "#F8FAFC",
+          bgcolor = "rgba(0,0,0,0)",
           radialaxis = list(
             visible = TRUE,
             range = c(0, 100),
-            color = "#64748B",
-            gridcolor = "#E2E8F0",
-            tickfont = list(size = 9, color = "#64748B")
+            color = "#94A3B8",
+            gridcolor = "rgba(255, 255, 255, 0.12)",
+            tickfont = list(size = 9, color = "#94A3B8")
           ),
           angularaxis = list(
-            color = "#0F172A",
-            gridcolor = "#E2E8F0",
-            tickfont = list(size = 11, color = "#0F172A", family = "Inter, sans-serif")
+            color = "#F8FAFC",
+            gridcolor = "rgba(255, 255, 255, 0.12)",
+            tickfont = list(size = 11, color = "#F8FAFC", family = "Inter, sans-serif")
           )
         ),
-        paper_bgcolor = "#FFFFFF",
-        plot_bgcolor = "#F8FAFC",
-        font = list(color = "#0F172A", family = "Inter, sans-serif"),
+        paper_bgcolor = "rgba(0,0,0,0)",
+        plot_bgcolor = "rgba(0,0,0,0)",
+        font = list(color = "#CBD5E1", family = "Inter, sans-serif"),
         showlegend = TRUE,
         legend = list(
           orientation = "h", 
           x = 0.2, 
           y = -0.15,
-          font = list(color = "#0F172A", size = 11),
-          bgcolor = "rgba(255, 255, 255, 0.9)"
+          font = list(color = "#F8FAFC", size = 11),
+          bgcolor = "rgba(16, 27, 46, 0.85)",
+          bordercolor = "rgba(255, 255, 255, 0.12)"
         )
       ) %>%
       config(displayModeBar = FALSE, responsive = TRUE)
