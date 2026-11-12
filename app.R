@@ -1,6 +1,7 @@
 # ==============================================================================
 # IPL 2025 Performance Analytics Dashboard
 # Modern Sports Intelligence & Cricket Performance Analytics Platform
+# Official IPL Theme: Royal Blue (#1D428A), Electric Blue (#0090DF), Gold (#FFB800)
 # ==============================================================================
 
 library(shiny)
@@ -133,16 +134,25 @@ team_summary <- full_join(team_batting_summary, team_bowling_summary, by = c("ba
 # Franchise Color Map for IPL Teams
 team_colors <- c(
   "CSK"  = "#FACC15",
-  "DC"   = "#3B82F6",
-  "GT"   = "#0284C7",
-  "KKR"  = "#8B5CF6",
-  "LSG"  = "#38BDF8",
-  "MI"   = "#2563EB",
-  "PBKS" = "#EF4444",
-  "RCB"  = "#DC2626",
+  "DC"   = "#2563EB",
+  "GT"   = "#0EA5E9",
+  "KKR"  = "#7C3AED",
+  "LSG"  = "#00A3E0",
+  "MI"   = "#004BA0",
+  "PBKS" = "#DC2626",
+  "RCB"  = "#B91C1C",
   "RR"   = "#EC4899",
-  "SRH"  = "#FF8A00"
+  "SRH"  = "#EA580C"
 )
+
+# Team Logo HTML Helper for DataTables and UI
+team_logo_html <- function(team_code, size = 20) {
+  if (is.na(team_code) || team_code == "") return("—")
+  tc <- tolower(trimws(team_code))
+  first_team <- tolower(trimws(strsplit(tc, ",")[[1]][1]))
+  svg_path <- paste0("teams/", first_team, ".svg")
+  paste0("<span class='team-badge-wrap'><img src='", svg_path, "' class='team-logo-icon' style='width:", size, "px; height:", size, "px;' alt='", team_code, "' /> <span class='team-code-text'>", team_code, "</span></span>")
+}
 
 # All unique players for search/dropdowns
 all_players <- sort(unique(c(batting_summary$striker, bowling_summary$bowler)))
@@ -158,53 +168,62 @@ normalize_metric <- function(val, min_val, max_val, invert = FALSE) {
   pmin(100, pmax(0, round(norm, 1)))
 }
 
-# Dark theme Plotly layout template
-dark_plotly_layout <- function(p, title = "", showlegend = TRUE) {
+# Light, Attractive, Uncongested Plotly layout template
+light_plotly_layout <- function(p, title = "", showlegend = TRUE) {
   p %>%
     layout(
-      title = list(text = title, font = list(color = "#F8FAFC", size = 14, family = "Inter, sans-serif")),
-      paper_bgcolor = "#1B2330",
-      plot_bgcolor = "#1B2330",
-      font = list(color = "#94A3B8", family = "Inter, sans-serif", size = 11),
+      title = list(
+        text = title,
+        font = list(color = "#0F172A", size = 14, family = "Inter, sans-serif")
+      ),
+      paper_bgcolor = "#FFFFFF",
+      plot_bgcolor = "#F8FAFC",
+      font = list(color = "#475569", family = "Inter, sans-serif", size = 11),
       showlegend = showlegend,
-      legend = list(font = list(color = "#F8FAFC", size = 11), bgcolor = "rgba(0,0,0,0)"),
-      margin = list(l = 50, r = 30, t = 50, b = 50),
+      legend = list(
+        font = list(color = "#1E293B", size = 11),
+        bgcolor = "rgba(255, 255, 255, 0.95)",
+        bordercolor = "#E2E8F0",
+        borderwidth = 1
+      ),
+      margin = list(l = 55, r = 30, t = 45, b = 55),
+      bargap = 0.35, # Generous spacing between bars - NOT congested!
       hoverlabel = list(
-        bgcolor = "#222D3B",
-        bordercolor = "#FF8A00",
-        font = list(color = "#F8FAFC", family = "Inter, sans-serif")
+        bgcolor = "#0F172A",
+        bordercolor = "#0090DF",
+        font = list(color = "#FFFFFF", family = "Inter, sans-serif")
       ),
       xaxis = list(
-        gridcolor = "#2B3645",
-        zerolinecolor = "#2B3645",
-        tickfont = list(color = "#94A3B8")
+        gridcolor = "#F1F5F9",
+        zerolinecolor = "#CBD5E1",
+        tickfont = list(color = "#334155", size = 11)
       ),
       yaxis = list(
-        gridcolor = "#2B3645",
-        zerolinecolor = "#2B3645",
-        tickfont = list(color = "#94A3B8")
+        gridcolor = "#E2E8F0",
+        zerolinecolor = "#CBD5E1",
+        tickfont = list(color = "#334155", size = 11)
       )
     ) %>%
     config(displayModeBar = FALSE, responsive = TRUE)
 }
 
 # ------------------------------------------------------------------------------
-# 2. USER INTERFACE (Bootstrap 5 + Custom Dark CSS)
+# 2. USER INTERFACE (Bootstrap 5 + Custom IPL Theme)
 # ------------------------------------------------------------------------------
 ui <- page_fluid(
   theme = bs_theme(
     version = 5,
-    bg = "#10141D",
-    fg = "#F8FAFC",
-    primary = "#FF8A00",
-    secondary = "#38BDF8",
+    bg = "#0B111E",
+    fg = "#FFFFFF",
+    primary = "#0090DF",
+    secondary = "#FFB800",
     base_font = font_google("Inter")
   ),
-  title = "IPL 2025 Performance Analysis | Cricket Intelligence Platform",
+  title = "IPL 2025 Performance Analysis | Official Cricket Intelligence Platform",
   
   # Inject Custom CSS and Google Fonts
   tags$head(
-    tags$link(rel = "stylesheet", href = "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"),
+    tags$link(rel = "stylesheet", href = "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"),
     tags$link(rel = "stylesheet", type = "text/css", href = "styles.css")
   ),
   
@@ -215,16 +234,16 @@ ui <- page_fluid(
     div(
       class = "app-sidebar",
       
-      # Brand Header
+      # Brand Header with Official IPL Logo
       div(
         class = "brand-section",
         div(
-          class = "brand-icon",
-          tags$img(src = "logo.svg", width = "28", height = "28", alt = "IPL")
+          class = "brand-logo-container",
+          tags$img(src = "ipl_logo.png", alt = "IPL Logo", class = "brand-logo-img")
         ),
         div(
           div(class = "brand-title", "IPL INSIGHTS"),
-          div(class = "brand-subtitle", "Season 2025 Platform")
+          div(class = "brand-subtitle", "Season 2025 Official")
         )
       ),
       
@@ -259,7 +278,7 @@ ui <- page_fluid(
     div(
       class = "main-wrapper",
       
-      # Top Header Bar
+      # Top Header Bar with IPL Logo Integration
       div(
         class = "top-header",
         div(
@@ -269,9 +288,14 @@ ui <- page_fluid(
         div(
           class = "header-badges",
           div(
+            class = "header-ipl-badge",
+            tags$img(src = "ipl_logo.png", alt = "IPL", class = "header-logo-mini"),
+            span(style = "font-size: 0.82rem; font-weight: 700; color: #0090DF;", "IPL 2025")
+          ),
+          div(
             class = "status-badge",
             span(class = "pulse-dot"),
-            "IPL 2025 SEASON"
+            "SEASON COMPLETE"
           )
         )
       ),
@@ -286,7 +310,7 @@ ui <- page_fluid(
           type = "hidden",
           
           # ====================================================================
-          # PAGE 1: OVERVIEW
+          # PAGE 1: OVERVIEW (Light & Uncongested Visualizations)
           # ====================================================================
           tabPanel(
             "overview",
@@ -297,19 +321,19 @@ ui <- page_fluid(
                 class = "kpi-card kpi-primary",
                 div(class = "kpi-header", span(class = "kpi-title", "Total Matches"), div(class = "kpi-icon-wrap", "🏟️")),
                 div(class = "kpi-value", format(total_matches, big.mark = ",")),
-                div(class = "kpi-subtitle", "Complete 2025 season campaign")
+                div(class = "kpi-subtitle", "Complete 2025 tournament")
               ),
               div(
                 class = "kpi-card kpi-secondary",
                 div(class = "kpi-header", span(class = "kpi-title", "Total Deliveries"), div(class = "kpi-icon-wrap", "⚡")),
                 div(class = "kpi-value", format(total_deliveries, big.mark = ",")),
-                div(class = "kpi-subtitle", "Full ball-by-ball coverage")
+                div(class = "kpi-subtitle", "Full ball-by-ball records")
               ),
               div(
                 class = "kpi-card kpi-positive",
                 div(class = "kpi-header", span(class = "kpi-title", "Total Runs Scored"), div(class = "kpi-icon-wrap", "🏏")),
                 div(class = "kpi-value", format(total_runs, big.mark = ",")),
-                div(class = "kpi-subtitle", "Bat runs + team extras combined")
+                div(class = "kpi-subtitle", "Bat runs + team extras")
               ),
               div(
                 class = "kpi-card kpi-purple",
@@ -330,11 +354,11 @@ ui <- page_fluid(
                     div(
                       class = "card-title-group",
                       tags$h2("Runs Distribution by Innings & Phase"),
-                      tags$p("Progression across Powerplay, Middle, and Death overs")
+                      tags$p("Powerplay (1–6), Middle (7–15), and Death (16–20)")
                     ),
                     span(class = "card-action-pill", "Phase Split")
                   ),
-                  withSpinner(plotlyOutput("plot_overview_runs_dist", height = "340px"), type = 4, color = "#FF8A00")
+                  withSpinner(plotlyOutput("plot_overview_runs_dist", height = "330px"), type = 4, color = "#0090DF")
                 )
               ),
               column(
@@ -350,12 +374,12 @@ ui <- page_fluid(
                     ),
                     span(class = "card-action-pill", "10 Franchises")
                   ),
-                  withSpinner(plotlyOutput("plot_overview_team_scoring", height = "340px"), type = 4, color = "#FF8A00")
+                  withSpinner(plotlyOutput("plot_overview_team_scoring", height = "330px"), type = 4, color = "#0090DF")
                 )
               )
             ),
             
-            # Row 2: Top Batsmen & Top Bowlers
+            # Row 2: Top Batsmen & Top Bowlers (Guarded from Overflow + Team Logos)
             fluidRow(
               column(
                 width = 6,
@@ -365,12 +389,15 @@ ui <- page_fluid(
                     class = "analytics-card-header",
                     div(
                       class = "card-title-group",
-                      tags$h2("Top 5 Batsmen (Orange Cap Contenders)"),
-                      tags$p("Ranked by total runs with strike rate & batting average")
+                      tags$h2("Top 5 Batsmen (Orange Cap)"),
+                      tags$p("Season leaders by runs, strike rate & average")
                     ),
-                    span(class = "card-action-pill", "Season Leaders")
+                    span(class = "card-action-pill", "Orange Cap")
                   ),
-                  DTOutput("table_top_batsmen")
+                  div(
+                    class = "table-responsive-container",
+                    DTOutput("table_top_batsmen")
+                  )
                 )
               ),
               column(
@@ -381,17 +408,20 @@ ui <- page_fluid(
                     class = "analytics-card-header",
                     div(
                       class = "card-title-group",
-                      tags$h2("Top 5 Bowlers (Purple Cap Contenders)"),
-                      tags$p("Ranked by credited wickets with economy rate & average")
+                      tags$h2("Top 5 Bowlers (Purple Cap)"),
+                      tags$p("Season leaders by credited wickets & economy")
                     ),
-                    span(class = "card-action-pill", "Wicket Takers")
+                    span(class = "card-action-pill", "Purple Cap")
                   ),
-                  DTOutput("table_top_bowlers")
+                  div(
+                    class = "table-responsive-container",
+                    DTOutput("table_top_bowlers")
+                  )
                 )
               )
             ),
             
-            # Row 3: Team Rankings Leaderboard
+            # Row 3: Team Rankings Leaderboard (With Team Logos)
             div(
               class = "analytics-card",
               div(
@@ -399,11 +429,14 @@ ui <- page_fluid(
                 div(
                   class = "card-title-group",
                   tags$h2("IPL 2025 Franchise Performance Standings"),
-                  tags$p("Comprehensive season rankings: matches, runs, run rates, and wickets")
+                  tags$p("Matches, runs scored, scoring run rates, wickets taken and conceded")
                 ),
-                span(class = "card-action-pill", "Standings")
+                span(class = "card-action-pill", "Season Standings")
               ),
-              DTOutput("table_team_rankings")
+              div(
+                class = "table-responsive-container",
+                DTOutput("table_team_rankings")
+              )
             )
           ),
           
@@ -423,7 +456,12 @@ ui <- page_fluid(
                   label = NULL,
                   choices = all_players,
                   selected = "Sai Sudharsan",
-                  options = list(placeholder = "Search player name...", maxOptions = 200)
+                  options = list(
+                    placeholder = "Type player name to search...",
+                    maxOptions = 250,
+                    openOnFocus = TRUE,
+                    selectOnTab = TRUE
+                  )
                 )
               ),
               div(
@@ -440,7 +478,7 @@ ui <- page_fluid(
               )
             ),
             
-            # Dynamic Player Analytics Output (Batting or Bowling)
+            # Dynamic Player Analytics Output
             uiOutput("player_analytics_ui")
           ),
           
@@ -474,7 +512,7 @@ ui <- page_fluid(
               )
             ),
             
-            # Team KPI Cards
+            # Team KPI Cards with Big Team Crest Banner
             uiOutput("team_kpi_cards_ui"),
             
             # Team Visualizations Row 1
@@ -492,7 +530,7 @@ ui <- page_fluid(
                     ),
                     span(class = "card-action-pill", "Scoring Trend")
                   ),
-                  withSpinner(plotlyOutput("plot_team_match_trend", height = "320px"), type = 4, color = "#FF8A00")
+                  withSpinner(plotlyOutput("plot_team_match_trend", height = "320px"), type = 4, color = "#0090DF")
                 )
               ),
               column(
@@ -508,7 +546,7 @@ ui <- page_fluid(
                     ),
                     span(class = "card-action-pill", "Innings Split")
                   ),
-                  withSpinner(plotlyOutput("plot_team_innings_comp", height = "320px"), type = 4, color = "#FF8A00")
+                  withSpinner(plotlyOutput("plot_team_innings_comp", height = "320px"), type = 4, color = "#0090DF")
                 )
               )
             ),
@@ -528,7 +566,7 @@ ui <- page_fluid(
                     ),
                     span(class = "card-action-pill", "Batting Phases")
                   ),
-                  withSpinner(plotlyOutput("plot_team_bat_phase", height = "280px"), type = 4, color = "#FF8A00")
+                  withSpinner(plotlyOutput("plot_team_bat_phase", height = "280px"), type = 4, color = "#0090DF")
                 )
               ),
               column(
@@ -544,12 +582,12 @@ ui <- page_fluid(
                     ),
                     span(class = "card-action-pill", "Bowling Phases")
                   ),
-                  withSpinner(plotlyOutput("plot_team_bowl_phase", height = "280px"), type = 4, color = "#FF8A00")
+                  withSpinner(plotlyOutput("plot_team_bowl_phase", height = "280px"), type = 4, color = "#0090DF")
                 )
               )
             ),
             
-            # Team Rosters Top 3
+            # Team Rosters Top 3 with Team Crests
             fluidRow(
               column(
                 width = 6,
@@ -564,7 +602,10 @@ ui <- page_fluid(
                     ),
                     span(class = "card-action-pill", "Top Batters")
                   ),
-                  DTOutput("table_team_top_bat")
+                  div(
+                    class = "table-responsive-container",
+                    DTOutput("table_team_top_bat")
+                  )
                 )
               ),
               column(
@@ -580,14 +621,17 @@ ui <- page_fluid(
                     ),
                     span(class = "card-action-pill", "Top Bowlers")
                   ),
-                  DTOutput("table_team_top_bowl")
+                  div(
+                    class = "table-responsive-container",
+                    DTOutput("table_team_top_bowl")
+                  )
                 )
               )
             )
           ),
           
           # ====================================================================
-          # PAGE 4: PLAYER COMPARISON STUDIO
+          # PAGE 4: PLAYER COMPARISON STUDIO (Fast Autocomplete & Team Logos)
           # ====================================================================
           tabPanel(
             "comparison",
@@ -595,23 +639,35 @@ ui <- page_fluid(
             div(
               class = "filter-panel",
               div(
-                style = "flex: 1; min-width: 220px;",
-                tags$label("Player A"),
+                style = "flex: 1; min-width: 240px;",
+                tags$label("Player A (Type to Search)"),
                 selectizeInput(
                   inputId = "comp_player_a",
                   label = NULL,
                   choices = all_players,
-                  selected = "Sai Sudharsan"
+                  selected = "Sai Sudharsan",
+                  options = list(
+                    placeholder = "Search Player A (e.g. Kohli, Rohit, Gill)...",
+                    maxOptions = 250,
+                    openOnFocus = TRUE,
+                    selectOnTab = TRUE
+                  )
                 )
               ),
               div(
-                style = "flex: 1; min-width: 220px;",
-                tags$label("Player B"),
+                style = "flex: 1; min-width: 240px;",
+                tags$label("Player B (Type to Search)"),
                 selectizeInput(
                   inputId = "comp_player_b",
                   label = NULL,
                   choices = all_players,
-                  selected = "Suryakumar Yadav"
+                  selected = "Suryakumar Yadav",
+                  options = list(
+                    placeholder = "Search Player B (e.g. Bumrah, Noor, Head)...",
+                    maxOptions = 250,
+                    openOnFocus = TRUE,
+                    selectOnTab = TRUE
+                  )
                 )
               ),
               div(
@@ -650,13 +706,18 @@ server <- function(input, output, session) {
     updateTabsetPanel(session, "main_tabs", selected = input$nav_menu)
   })
   
+  # Initialize Server-Side Selectize for Instant, Responsive Search
+  updateSelectizeInput(session, "comp_player_a", choices = all_players, selected = "Sai Sudharsan", server = TRUE)
+  updateSelectizeInput(session, "comp_player_b", choices = all_players, selected = "Suryakumar Yadav", server = TRUE)
+  updateSelectizeInput(session, "player_select", choices = all_players, selected = "Sai Sudharsan", server = TRUE)
+  
   # Dynamic Header Title and Subtitle based on active page
   output$header_title_ui <- renderUI({
     switch(
       input$nav_menu,
       "overview" = tagList(
         tags$h1("IPL 2025 Season Overview"),
-        tags$p("Comprehensive season performance, franchise rankings and tournament benchmarks")
+        tags$p("Comprehensive tournament benchmarks, franchise standings and award contenders")
       ),
       "player" = tagList(
         tags$h1(paste("Player Analytics —", req(input$player_select))),
@@ -677,7 +738,7 @@ server <- function(input, output, session) {
   # PAGE 1: OVERVIEW SERVER OUTPUTS
   # ============================================================================
   
-  # Overview Chart A: Runs Distribution by Innings & Phase
+  # Overview Chart A: Runs Distribution by Innings & Phase (Bright & Spacious)
   output$plot_overview_runs_dist <- renderPlotly({
     phase_data <- ipl %>%
       filter(innings %in% c(1, 2)) %>%
@@ -693,8 +754,9 @@ server <- function(input, output, session) {
       x = ~over_phase,
       y = ~runs,
       color = ~innings_label,
-      colors = c("#FF8A00", "#38BDF8"),
-      type = "bar"
+      colors = c("#0090DF", "#F59E0B"),
+      type = "bar",
+      marker = list(line = list(color = "#FFFFFF", width = 1.5))
     ) %>%
       layout(
         barmode = "group",
@@ -702,10 +764,10 @@ server <- function(input, output, session) {
         yaxis = list(title = "Total Runs Scored")
       )
     
-    dark_plotly_layout(p, title = "")
+    light_plotly_layout(p, title = "")
   })
   
-  # Overview Chart B: Franchise Total Runs Horizontal Bar
+  # Overview Chart B: Franchise Total Runs Horizontal Bar (With Franchise Colors)
   output$plot_overview_team_scoring <- renderPlotly({
     team_data <- team_summary %>%
       arrange(runs_scored) %>%
@@ -718,8 +780,8 @@ server <- function(input, output, session) {
       type = "bar",
       orientation = "h",
       marker = list(
-        color = "#FF8A00",
-        line = list(color = "#FFA233", width = 1)
+        color = "#0090DF",
+        line = list(color = "#0284C7", width = 1)
       ),
       hovertemplate = "<b>%{y}</b><br>Total Runs: %{x}<br>Matches: %{customdata[0]}<br>Run Rate: %{customdata[1]}<extra></extra>",
       customdata = cbind(team_data$matches, team_data$run_rate)
@@ -729,31 +791,33 @@ server <- function(input, output, session) {
         yaxis = list(title = "")
       )
     
-    dark_plotly_layout(p, title = "", showlegend = FALSE)
+    light_plotly_layout(p, title = "", showlegend = FALSE)
   })
   
-  # Overview Table C: Top 5 Batsmen
+  # Overview Table C: Top 5 Batsmen (With Franchise Logos & Protected Borders)
   output$table_top_batsmen <- renderDT({
     top5_bat <- batting_summary %>%
       head(5) %>%
       transmute(
         Rank = row_number(),
         Player = striker,
-        Team = teams,
+        Franchise = sapply(teams, team_logo_html, size = 20),
         Runs = runs,
         Balls = balls,
-        `Strike Rate` = format(strike_rate, nsmall = 1),
-        Average = ifelse(is.na(batting_avg), paste0(runs, "*"), format(batting_avg, nsmall = 1)),
-        `4s` = fours,
-        `6s` = sixes
+        `SR` = format(strike_rate, nsmall = 1),
+        `Avg` = ifelse(is.na(batting_avg), paste0(runs, "*"), format(batting_avg, nsmall = 1)),
+        Boundaries = paste0(fours, "x4 · ", sixes, "x6")
       )
     
     datatable(
       top5_bat,
+      escape = FALSE,
       options = list(
         dom = "t",
         paging = FALSE,
         ordering = FALSE,
+        scrollX = TRUE,
+        autoWidth = TRUE,
         columnDefs = list(list(className = "dt-center", targets = "_all"))
       ),
       rownames = FALSE,
@@ -761,28 +825,31 @@ server <- function(input, output, session) {
     )
   })
   
-  # Overview Table D: Top 5 Bowlers
+  # Overview Table D: Top 5 Bowlers (With Franchise Logos & Protected Borders)
   output$table_top_bowlers <- renderDT({
     top5_bowl <- bowling_summary %>%
       head(5) %>%
       transmute(
         Rank = row_number(),
         Bowler = bowler,
-        Team = teams,
+        Franchise = sapply(teams, team_logo_html, size = 20),
         Wickets = wickets,
         Overs = overs_display,
         Runs = runs_conceded,
         Economy = format(economy, nsmall = 2),
-        Average = ifelse(is.na(bowling_avg), "—", format(bowling_avg, nsmall = 1)),
+        `Avg` = ifelse(is.na(bowling_avg), "—", format(bowling_avg, nsmall = 1)),
         `Dot %` = paste0(dot_pct, "%")
       )
     
     datatable(
       top5_bowl,
+      escape = FALSE,
       options = list(
         dom = "t",
         paging = FALSE,
         ordering = FALSE,
+        scrollX = TRUE,
+        autoWidth = TRUE,
         columnDefs = list(list(className = "dt-center", targets = "_all"))
       ),
       rownames = FALSE,
@@ -790,12 +857,12 @@ server <- function(input, output, session) {
     )
   })
   
-  # Overview Table E: Team Rankings Standings
+  # Overview Table E: Team Rankings Standings (With Team Logos)
   output$table_team_rankings <- renderDT({
     team_table <- team_summary %>%
       transmute(
         Rank = row_number(),
-        Franchise = team,
+        Franchise = sapply(team, team_logo_html, size = 24),
         Matches = matches,
         `Runs Scored` = runs_scored,
         `Balls Faced` = balls_faced,
@@ -806,10 +873,13 @@ server <- function(input, output, session) {
     
     datatable(
       team_table,
+      escape = FALSE,
       options = list(
         pageLength = 10,
         dom = "tp",
         ordering = TRUE,
+        scrollX = TRUE,
+        autoWidth = TRUE,
         columnDefs = list(list(className = "dt-center", targets = "_all"))
       ),
       rownames = FALSE,
@@ -821,7 +891,6 @@ server <- function(input, output, session) {
   # PAGE 2: PLAYER ANALYTICS SERVER OUTPUTS
   # ============================================================================
   
-  # Dynamic UI for Player Analytics based on Batting vs Bowling selection
   output$player_analytics_ui <- renderUI({
     req(input$player_select, input$player_category)
     
@@ -842,6 +911,8 @@ server <- function(input, output, session) {
         )
       }
       
+      p_team_code <- tolower(trimws(strsplit(p_bat$teams, ",")[[1]][1]))
+      
       tagList(
         # 8 Batting KPI Cards
         div(
@@ -850,7 +921,11 @@ server <- function(input, output, session) {
             class = "kpi-card kpi-primary",
             div(class = "kpi-header", span(class = "kpi-title", "Total Runs"), div(class = "kpi-icon-wrap", "🏏")),
             div(class = "kpi-value", format(p_bat$runs, big.mark = ",")),
-            div(class = "kpi-subtitle", paste("Franchise:", p_bat$teams))
+            div(
+              class = "kpi-subtitle",
+              tags$img(src = paste0("teams/", p_team_code, ".svg"), style = "width: 14px; height: 14px; vertical-align: middle; margin-right: 4px;"),
+              paste("Franchise:", p_bat$teams)
+            )
           ),
           div(
             class = "kpi-card kpi-secondary",
@@ -880,23 +955,23 @@ server <- function(input, output, session) {
             class = "kpi-card kpi-secondary",
             div(class = "kpi-header", span(class = "kpi-title", "Sixes (6s)"), div(class = "kpi-icon-wrap", "💥")),
             div(class = "kpi-value", p_bat$sixes),
-            div(class = "kpi-subtitle", paste(p_bat$sixes * 6, "runs over the ropes"))
+            div(class = "kpi-subtitle", paste(p_bat$sixes * 6, "runs over ropes"))
           ),
           div(
             class = "kpi-card kpi-positive",
             div(class = "kpi-header", span(class = "kpi-title", "Boundary Run %"), div(class = "kpi-icon-wrap", "🎯")),
             div(class = "kpi-value", paste0(p_bat$boundary_pct, "%")),
-            div(class = "kpi-subtitle", paste0(p_bat$fours * 4 + p_bat$sixes * 6, " / ", p_bat$runs, " runs in boundaries"))
+            div(class = "kpi-subtitle", paste0(p_bat$fours * 4 + p_bat$sixes * 6, " / ", p_bat$runs, " boundary runs"))
           ),
           div(
             class = "kpi-card kpi-purple",
             div(class = "kpi-header", span(class = "kpi-title", "Matches Played"), div(class = "kpi-icon-wrap", "🏟️")),
             div(class = "kpi-value", p_bat$matches),
-            div(class = "kpi-subtitle", "Innings with batting impact")
+            div(class = "kpi-subtitle", "Appearances with batting impact")
           )
         ),
         
-        # Batting Visualizations Row 1
+        # Batting Visualizations Row 1 (Light & Spacious)
         fluidRow(
           column(
             width = 7,
@@ -911,7 +986,7 @@ server <- function(input, output, session) {
                 ),
                 span(class = "card-action-pill", "Match Trend")
               ),
-              withSpinner(plotlyOutput("plot_player_bat_match_trend", height = "320px"), type = 4, color = "#FF8A00")
+              withSpinner(plotlyOutput("plot_player_bat_match_trend", height = "320px"), type = 4, color = "#0090DF")
             )
           ),
           column(
@@ -927,7 +1002,7 @@ server <- function(input, output, session) {
                 ),
                 span(class = "card-action-pill", "Run Composition")
               ),
-              withSpinner(plotlyOutput("plot_player_bat_runs_donut", height = "320px"), type = 4, color = "#FF8A00")
+              withSpinner(plotlyOutput("plot_player_bat_runs_donut", height = "320px"), type = 4, color = "#0090DF")
             )
           )
         ),
@@ -947,7 +1022,7 @@ server <- function(input, output, session) {
                 ),
                 span(class = "card-action-pill", "Innings Split")
               ),
-              withSpinner(plotlyOutput("plot_player_bat_innings", height = "280px"), type = 4, color = "#FF8A00")
+              withSpinner(plotlyOutput("plot_player_bat_innings", height = "280px"), type = 4, color = "#0090DF")
             )
           ),
           column(
@@ -963,7 +1038,7 @@ server <- function(input, output, session) {
                 ),
                 span(class = "card-action-pill", "Phase Progression")
               ),
-              withSpinner(plotlyOutput("plot_player_bat_phase", height = "280px"), type = 4, color = "#FF8A00")
+              withSpinner(plotlyOutput("plot_player_bat_phase", height = "280px"), type = 4, color = "#0090DF")
             )
           )
         ),
@@ -980,7 +1055,10 @@ server <- function(input, output, session) {
             ),
             span(class = "card-action-pill", "Innings Log")
           ),
-          DTOutput("table_player_bat_log")
+          div(
+            class = "table-responsive-container",
+            DTOutput("table_player_bat_log")
+          )
         )
       )
     } else {
@@ -997,6 +1075,8 @@ server <- function(input, output, session) {
           )
         )
       }
+      
+      p_team_code <- tolower(trimws(strsplit(p_bowl$teams, ",")[[1]][1]))
       
       tagList(
         # 7 Bowling KPI Cards
@@ -1046,7 +1126,7 @@ server <- function(input, output, session) {
           )
         ),
         
-        # Bowling Visualizations Row 1
+        # Bowling Visualizations Row 1 (Light & Spacious)
         fluidRow(
           column(
             width = 7,
@@ -1061,7 +1141,7 @@ server <- function(input, output, session) {
                 ),
                 span(class = "card-action-pill", "Spell Trend")
               ),
-              withSpinner(plotlyOutput("plot_player_bowl_match_trend", height = "320px"), type = 4, color = "#FF8A00")
+              withSpinner(plotlyOutput("plot_player_bowl_match_trend", height = "320px"), type = 4, color = "#0090DF")
             )
           ),
           column(
@@ -1077,7 +1157,7 @@ server <- function(input, output, session) {
                 ),
                 span(class = "card-action-pill", "Economy")
               ),
-              withSpinner(plotlyOutput("plot_player_bowl_economy", height = "320px"), type = 4, color = "#FF8A00")
+              withSpinner(plotlyOutput("plot_player_bowl_economy", height = "320px"), type = 4, color = "#0090DF")
             )
           )
         ),
@@ -1097,7 +1177,7 @@ server <- function(input, output, session) {
                 ),
                 span(class = "card-action-pill", "Innings Split")
               ),
-              withSpinner(plotlyOutput("plot_player_bowl_innings", height = "280px"), type = 4, color = "#FF8A00")
+              withSpinner(plotlyOutput("plot_player_bowl_innings", height = "280px"), type = 4, color = "#0090DF")
             )
           ),
           column(
@@ -1113,7 +1193,7 @@ server <- function(input, output, session) {
                 ),
                 span(class = "card-action-pill", "Phase Impact")
               ),
-              withSpinner(plotlyOutput("plot_player_bowl_phase", height = "280px"), type = 4, color = "#FF8A00")
+              withSpinner(plotlyOutput("plot_player_bowl_phase", height = "280px"), type = 4, color = "#0090DF")
             )
           )
         ),
@@ -1130,13 +1210,16 @@ server <- function(input, output, session) {
             ),
             span(class = "card-action-pill", "Bowling Log")
           ),
-          DTOutput("table_player_bowl_log")
+          div(
+            class = "table-responsive-container",
+            DTOutput("table_player_bowl_log")
+          )
         )
       )
     }
   })
   
-  # Player Batting Charts
+  # Player Batting Charts (Luminous & Eye-Catching)
   output$plot_player_bat_match_trend <- renderPlotly({
     req(input$player_select)
     p_data <- ipl %>%
@@ -1157,7 +1240,7 @@ server <- function(input, output, session) {
         x = ~match_label,
         y = ~runs,
         name = "Runs Scored",
-        marker = list(color = "#FF8A00")
+        marker = list(color = "#0090DF", line = list(color = "#0284C7", width = 1))
       ) %>%
       add_trace(
         type = "scatter",
@@ -1165,15 +1248,15 @@ server <- function(input, output, session) {
         x = ~match_label,
         y = ~balls,
         name = "Balls Faced",
-        line = list(color = "#38BDF8", width = 2.5),
-        marker = list(color = "#38BDF8", size = 6)
+        line = list(color = "#F59E0B", width = 2.5),
+        marker = list(color = "#F59E0B", size = 7)
       ) %>%
       layout(
         xaxis = list(title = "Match (Opponent)"),
         yaxis = list(title = "Count")
       )
     
-    dark_plotly_layout(p, title = "")
+    light_plotly_layout(p, title = "")
   })
   
   output$plot_player_bat_runs_donut <- renderPlotly({
@@ -1196,14 +1279,16 @@ server <- function(input, output, session) {
       values = ~runs,
       type = "pie",
       hole = 0.55,
-      marker = list(colors = c("#FF8A00", "#DC2626", "#38BDF8")),
+      marker = list(colors = c("#0090DF", "#1D428A", "#F59E0B")),
       textinfo = "label+percent"
     ) %>%
       layout(
+        paper_bgcolor = "#FFFFFF",
+        font = list(color = "#1E293B", family = "Inter, sans-serif"),
         showlegend = TRUE
       )
     
-    dark_plotly_layout(p, title = "")
+    light_plotly_layout(p, title = "")
   })
   
   output$plot_player_bat_innings <- renderPlotly({
@@ -1225,7 +1310,7 @@ server <- function(input, output, session) {
       y = ~runs,
       type = "bar",
       name = "Runs",
-      marker = list(color = "#FF8A00"),
+      marker = list(color = "#0090DF", line = list(color = "#0284C7", width = 1)),
       text = ~paste("SR:", strike_rate),
       textposition = "auto"
     ) %>%
@@ -1234,7 +1319,7 @@ server <- function(input, output, session) {
         yaxis = list(title = "Runs Scored")
       )
     
-    dark_plotly_layout(p, title = "", showlegend = FALSE)
+    light_plotly_layout(p, title = "", showlegend = FALSE)
   })
   
   output$plot_player_bat_phase <- renderPlotly({
@@ -1255,7 +1340,7 @@ server <- function(input, output, session) {
       x = ~over_phase,
       y = ~runs,
       type = "bar",
-      marker = list(color = "#38BDF8"),
+      marker = list(color = "#38BDF8", line = list(color = "#0284C7", width = 1)),
       text = ~paste("SR:", strike_rate),
       textposition = "auto"
     ) %>%
@@ -1264,7 +1349,7 @@ server <- function(input, output, session) {
         yaxis = list(title = "Runs Scored")
       )
     
-    dark_plotly_layout(p, title = "", showlegend = FALSE)
+    light_plotly_layout(p, title = "", showlegend = FALSE)
   })
   
   output$table_player_bat_log <- renderDT({
@@ -1286,7 +1371,7 @@ server <- function(input, output, session) {
       transmute(
         `Match #` = match_no,
         Date = date,
-        Opponent = bowling_team,
+        Opponent = sapply(bowling_team, team_logo_html, size = 18),
         Runs,
         Balls,
         `4s`,
@@ -1296,10 +1381,13 @@ server <- function(input, output, session) {
     
     datatable(
       match_log,
+      escape = FALSE,
       options = list(
         pageLength = 8,
         dom = "tp",
         ordering = TRUE,
+        scrollX = TRUE,
+        autoWidth = TRUE,
         columnDefs = list(list(className = "dt-center", targets = "_all"))
       ),
       rownames = FALSE,
@@ -1327,7 +1415,7 @@ server <- function(input, output, session) {
         x = ~match_label,
         y = ~wickets,
         name = "Wickets",
-        marker = list(color = "#22C55E")
+        marker = list(color = "#10B981")
       ) %>%
       add_trace(
         type = "scatter",
@@ -1345,7 +1433,7 @@ server <- function(input, output, session) {
         yaxis2 = list(title = "Runs Conceded", overlaying = "y", side = "right", showgrid = FALSE)
       )
     
-    dark_plotly_layout(p, title = "")
+    light_plotly_layout(p, title = "")
   })
   
   output$plot_player_bowl_economy <- renderPlotly({
@@ -1371,8 +1459,8 @@ server <- function(input, output, session) {
         x = ~match_label,
         y = ~economy,
         name = "Economy Rate",
-        line = list(color = "#38BDF8", width = 2.5),
-        marker = list(color = "#38BDF8", size = 6)
+        line = list(color = "#0090DF", width = 2.5),
+        marker = list(color = "#0090DF", size = 6)
       ) %>%
       add_lines(
         x = ~match_label,
@@ -1385,7 +1473,7 @@ server <- function(input, output, session) {
         yaxis = list(title = "Economy Rate (Runs/Over)")
       )
     
-    dark_plotly_layout(p, title = "")
+    light_plotly_layout(p, title = "")
   })
   
   output$plot_player_bowl_innings <- renderPlotly({
@@ -1407,7 +1495,7 @@ server <- function(input, output, session) {
       x = ~innings_label,
       y = ~wickets,
       type = "bar",
-      marker = list(color = "#A855F7"),
+      marker = list(color = "#0090DF"),
       text = ~paste("Econ:", economy),
       textposition = "auto"
     ) %>%
@@ -1416,7 +1504,7 @@ server <- function(input, output, session) {
         yaxis = list(title = "Wickets Taken")
       )
     
-    dark_plotly_layout(p, title = "", showlegend = FALSE)
+    light_plotly_layout(p, title = "", showlegend = FALSE)
   })
   
   output$plot_player_bowl_phase <- renderPlotly({
@@ -1438,7 +1526,7 @@ server <- function(input, output, session) {
       x = ~over_phase,
       y = ~wickets,
       type = "bar",
-      marker = list(color = "#22C55E"),
+      marker = list(color = "#10B981"),
       text = ~paste("Econ:", economy),
       textposition = "auto"
     ) %>%
@@ -1447,7 +1535,7 @@ server <- function(input, output, session) {
         yaxis = list(title = "Wickets Taken")
       )
     
-    dark_plotly_layout(p, title = "", showlegend = FALSE)
+    light_plotly_layout(p, title = "", showlegend = FALSE)
   })
   
   output$table_player_bowl_log <- renderDT({
@@ -1470,7 +1558,7 @@ server <- function(input, output, session) {
       transmute(
         `Match #` = match_no,
         Date = date,
-        Opponent = batting_team,
+        Opponent = sapply(batting_team, team_logo_html, size = 18),
         Overs,
         Runs,
         Wickets,
@@ -1480,10 +1568,13 @@ server <- function(input, output, session) {
     
     datatable(
       bowl_log,
+      escape = FALSE,
       options = list(
         pageLength = 8,
         dom = "tp",
         ordering = TRUE,
+        scrollX = TRUE,
+        autoWidth = TRUE,
         columnDefs = list(list(className = "dt-center", targets = "_all"))
       ),
       rownames = FALSE,
@@ -1492,45 +1583,56 @@ server <- function(input, output, session) {
   })
   
   # ============================================================================
-  # PAGE 3: TEAM ANALYTICS SERVER OUTPUTS
+  # PAGE 3: TEAM ANALYTICS SERVER OUTPUTS (With Team Logo Header)
   # ============================================================================
   
-  # Team KPI Cards
   output$team_kpi_cards_ui <- renderUI({
     req(input$team_select)
     tm <- input$team_select
     t_stat <- team_summary %>% filter(team == tm)
+    tm_lower <- tolower(tm)
     
-    div(
-      class = "kpi-grid",
+    tagList(
+      # Franchise Brand Header Banner
       div(
-        class = "kpi-card kpi-primary",
-        div(class = "kpi-header", span(class = "kpi-title", "Total Runs Scored"), div(class = "kpi-icon-wrap", "🏏")),
-        div(class = "kpi-value", format(t_stat$runs_scored, big.mark = ",")),
-        div(class = "kpi-subtitle", paste("Scored in", t_stat$matches_bat, "batting innings"))
+        class = "team-header-banner",
+        tags$img(src = paste0("teams/", tm_lower, ".svg"), class = "team-header-logo", alt = tm),
+        div(
+          div(style = "font-size: 1.3rem; font-weight: 800; color: #FFFFFF;", paste(tm, "Franchise Intelligence")),
+          div(style = "font-size: 0.82rem; color: #94A3B8;", "Season 2025 Performance • Official Squad Analytics & Phase Progression")
+        )
       ),
+      # Team KPI Cards
       div(
-        class = "kpi-card kpi-positive",
-        div(class = "kpi-header", span(class = "kpi-title", "Total Wickets Taken"), div(class = "kpi-icon-wrap", "🎯")),
-        div(class = "kpi-value", t_stat$wickets_taken),
-        div(class = "kpi-subtitle", "Taken by bowling attack")
-      ),
-      div(
-        class = "kpi-card kpi-secondary",
-        div(class = "kpi-header", span(class = "kpi-title", "Matches Played"), div(class = "kpi-icon-wrap", "🏟️")),
-        div(class = "kpi-value", t_stat$matches),
-        div(class = "kpi-subtitle", "2025 season fixtures")
-      ),
-      div(
-        class = "kpi-card kpi-purple",
-        div(class = "kpi-header", span(class = "kpi-title", "Average Run Rate"), div(class = "kpi-icon-wrap", "⚡")),
-        div(class = "kpi-value", format(t_stat$run_rate, nsmall = 2)),
-        div(class = "kpi-subtitle", "Runs per 6 legal deliveries")
+        class = "kpi-grid",
+        div(
+          class = "kpi-card kpi-primary",
+          div(class = "kpi-header", span(class = "kpi-title", "Total Runs Scored"), div(class = "kpi-icon-wrap", "🏏")),
+          div(class = "kpi-value", format(t_stat$runs_scored, big.mark = ",")),
+          div(class = "kpi-subtitle", paste("Scored in", t_stat$matches_bat, "batting innings"))
+        ),
+        div(
+          class = "kpi-card kpi-positive",
+          div(class = "kpi-header", span(class = "kpi-title", "Total Wickets Taken"), div(class = "kpi-icon-wrap", "🎯")),
+          div(class = "kpi-value", t_stat$wickets_taken),
+          div(class = "kpi-subtitle", "Taken by bowling attack")
+        ),
+        div(
+          class = "kpi-card kpi-secondary",
+          div(class = "kpi-header", span(class = "kpi-title", "Matches Played"), div(class = "kpi-icon-wrap", "🏟️")),
+          div(class = "kpi-value", t_stat$matches),
+          div(class = "kpi-subtitle", "2025 season fixtures")
+        ),
+        div(
+          class = "kpi-card kpi-purple",
+          div(class = "kpi-header", span(class = "kpi-title", "Average Run Rate"), div(class = "kpi-icon-wrap", "⚡")),
+          div(class = "kpi-value", format(t_stat$run_rate, nsmall = 2)),
+          div(class = "kpi-subtitle", "Runs per 6 legal deliveries")
+        )
       )
     )
   })
   
-  # Team Scoring Trend
   output$plot_team_match_trend <- renderPlotly({
     req(input$team_select)
     tm <- input$team_select
@@ -1546,13 +1648,13 @@ server <- function(input, output, session) {
       add_bars(
         x = ~match_label,
         y = ~runs,
-        marker = list(color = "#FF8A00"),
+        marker = list(color = "#0090DF"),
         name = "Runs"
       ) %>%
       add_lines(
         x = ~match_label,
         y = mean(match_data$runs),
-        line = list(color = "#38BDF8", dash = "dash", width = 2),
+        line = list(color = "#F59E0B", dash = "dash", width = 2),
         name = "Team Average"
       ) %>%
       layout(
@@ -1560,10 +1662,9 @@ server <- function(input, output, session) {
         yaxis = list(title = "Runs Scored")
       )
     
-    dark_plotly_layout(p, title = "")
+    light_plotly_layout(p, title = "")
   })
   
-  # Team Innings Comparison
   output$plot_team_innings_comp <- renderPlotly({
     req(input$team_select)
     tm <- input$team_select
@@ -1574,29 +1675,22 @@ server <- function(input, output, session) {
       summarise(runs = sum(runs_of_bat + extras, na.rm = TRUE), .groups = "drop") %>%
       mutate(metric = "Runs Scored", innings_label = paste("Innings", innings))
     
-    inn_wkts <- ipl %>%
-      filter(bowling_team == tm, innings %in% c(1, 2)) %>%
-      group_by(innings) %>%
-      summarise(wickets = sum(is_any_dismissal, na.rm = TRUE), .groups = "drop") %>%
-      mutate(metric = "Wickets Taken", innings_label = paste("Innings", innings))
-    
     p <- plot_ly(
       data = inn_runs,
       x = ~innings_label,
       y = ~runs,
       type = "bar",
       name = "Runs Scored",
-      marker = list(color = "#FF8A00")
+      marker = list(color = "#0090DF")
     ) %>%
       layout(
         xaxis = list(title = ""),
         yaxis = list(title = "Total Runs")
       )
     
-    dark_plotly_layout(p, title = "", showlegend = FALSE)
+    light_plotly_layout(p, title = "", showlegend = FALSE)
   })
   
-  # Team Batting Phase Distribution
   output$plot_team_bat_phase <- renderPlotly({
     req(input$team_select)
     tm <- input$team_select
@@ -1626,10 +1720,9 @@ server <- function(input, output, session) {
         yaxis = list(title = "Runs Scored")
       )
     
-    dark_plotly_layout(p, title = "", showlegend = FALSE)
+    light_plotly_layout(p, title = "", showlegend = FALSE)
   })
   
-  # Team Bowling Phase Distribution
   output$plot_team_bowl_phase <- renderPlotly({
     req(input$team_select)
     tm <- input$team_select
@@ -1649,17 +1742,16 @@ server <- function(input, output, session) {
       x = ~over_phase,
       y = ~wickets,
       type = "bar",
-      marker = list(color = "#22C55E")
+      marker = list(color = "#10B981")
     ) %>%
       layout(
         xaxis = list(title = ""),
         yaxis = list(title = "Wickets Taken")
       )
     
-    dark_plotly_layout(p, title = "", showlegend = FALSE)
+    light_plotly_layout(p, title = "", showlegend = FALSE)
   })
   
-  # Team Top 3 Batsmen Table
   output$table_team_top_bat <- renderDT({
     req(input$team_select)
     tm <- input$team_select
@@ -1682,6 +1774,7 @@ server <- function(input, output, session) {
       transmute(
         Rank = row_number(),
         Batsman = striker,
+        Franchise = sapply(tm, team_logo_html, size = 18),
         Runs = runs,
         Balls = balls,
         `Strike Rate` = strike_rate,
@@ -1691,13 +1784,20 @@ server <- function(input, output, session) {
     
     datatable(
       t_bat,
-      options = list(dom = "t", paging = FALSE, ordering = FALSE, columnDefs = list(list(className = "dt-center", targets = "_all"))),
+      escape = FALSE,
+      options = list(
+        dom = "t",
+        paging = FALSE,
+        ordering = FALSE,
+        scrollX = TRUE,
+        autoWidth = TRUE,
+        columnDefs = list(list(className = "dt-center", targets = "_all"))
+      ),
       rownames = FALSE,
       class = "compact stripe hover"
     )
   })
   
-  # Team Top 3 Bowlers Table
   output$table_team_top_bowl <- renderDT({
     req(input$team_select)
     tm <- input$team_select
@@ -1720,6 +1820,7 @@ server <- function(input, output, session) {
       transmute(
         Rank = row_number(),
         Bowler = bowler,
+        Franchise = sapply(tm, team_logo_html, size = 18),
         Wickets = wickets,
         Overs = overs,
         Runs = runs,
@@ -1728,29 +1829,35 @@ server <- function(input, output, session) {
     
     datatable(
       t_bowl,
-      options = list(dom = "t", paging = FALSE, ordering = FALSE, columnDefs = list(list(className = "dt-center", targets = "_all"))),
+      escape = FALSE,
+      options = list(
+        dom = "t",
+        paging = FALSE,
+        ordering = FALSE,
+        scrollX = TRUE,
+        autoWidth = TRUE,
+        columnDefs = list(list(className = "dt-center", targets = "_all"))
+      ),
       rownames = FALSE,
       class = "compact stripe hover"
     )
   })
   
   # ============================================================================
-  # PAGE 4: PLAYER COMPARISON STUDIO SERVER OUTPUTS
+  # PAGE 4: PLAYER COMPARISON STUDIO SERVER OUTPUTS (With Team Logos)
   # ============================================================================
   
-  # Validation warning if Player A == Player B
   output$comp_validation_ui <- renderUI({
     req(input$comp_player_a, input$comp_player_b)
     if (input$comp_player_a == input$comp_player_b) {
       div(
         class = "alert alert-warning",
-        style = "background: rgba(245, 158, 11, 0.15); border: 1px solid #F59E0B; color: #F59E0B; border-radius: 8px; padding: 12px 18px; margin-bottom: 20px;",
+        style = "background: rgba(255, 184, 0, 0.15); border: 1px solid #FFB800; color: #FFB800; border-radius: 8px; padding: 12px 18px; margin-bottom: 20px;",
         tags$b("Notice: "), "You have selected the same player for both Player A and Player B. Please select two different players to view a head-to-head comparison."
       )
     }
   })
   
-  # Dynamic Comparison Content UI
   output$comp_content_ui <- renderUI({
     req(input$comp_player_a, input$comp_player_b, input$comp_mode)
     
@@ -1762,7 +1869,6 @@ server <- function(input, output, session) {
       stat_a <- batting_summary %>% filter(striker == p_a)
       stat_b <- batting_summary %>% filter(striker == p_b)
       
-      # Handle cases where player has no batting records
       runs_a <- if (nrow(stat_a) > 0) stat_a$runs else 0
       balls_a <- if (nrow(stat_a) > 0) stat_a$balls else 0
       sr_a <- if (nrow(stat_a) > 0) stat_a$strike_rate else 0
@@ -1783,20 +1889,27 @@ server <- function(input, output, session) {
       matches_b <- if (nrow(stat_b) > 0) stat_b$matches else 0
       team_b <- if (nrow(stat_b) > 0) stat_b$teams else "—"
       
-      # Determine metric leaders
+      first_team_a <- tolower(trimws(strsplit(team_a, ",")[[1]][1]))
+      first_team_b <- tolower(trimws(strsplit(team_b, ",")[[1]][1]))
+      
       wins_a <- sum(c(runs_a > runs_b, sr_a > sr_b, avg_a > avg_b, (fours_a + sixes_a) > (fours_b + sixes_b), bpct_a > bpct_b))
       wins_b <- sum(c(runs_b > runs_a, sr_b > sr_a, avg_b > avg_a, (fours_b + sixes_b) > (fours_a + sixes_a), bpct_b > bpct_a))
       
       tagList(
-        # Side-by-side Cards
         div(
           class = "comparison-grid",
-          # Player A Card
+          # Player A Card with Franchise Crest
           div(
             class = paste("player-card", ifelse(wins_a > wins_b, "winner", "")),
             if (wins_a > wins_b) span(class = "leader-pill", "🏆 DUEL LEADER"),
-            tags$h3(style = "color: #FF8A00; margin: 0 0 4px 0;", p_a),
-            tags$p(style = "color: #94A3B8; font-size: 0.85rem; margin-bottom: 16px;", paste("Franchise:", team_a)),
+            div(
+              class = "player-card-header-row",
+              if (file.exists(paste0("www/teams/", first_team_a, ".svg"))) tags$img(src = paste0("teams/", first_team_a, ".svg"), class = "player-card-team-logo") else NULL,
+              div(
+                tags$h3(style = "color: #0090DF; margin: 0;", p_a),
+                tags$p(style = "color: #94A3B8; font-size: 0.85rem; margin: 2px 0 0 0;", paste("Franchise:", team_a))
+              )
+            ),
             div(class = "metric-row", span(class = "metric-label", "Total Runs"), span(class = paste("metric-val", ifelse(runs_a >= runs_b, "lead", "")), runs_a)),
             div(class = "metric-row", span(class = "metric-label", "Strike Rate"), span(class = paste("metric-val", ifelse(sr_a >= sr_b, "lead", "")), sr_a)),
             div(class = "metric-row", span(class = "metric-label", "Batting Average"), span(class = paste("metric-val", ifelse(avg_a >= avg_b, "lead", "")), ifelse(avg_a > 0, avg_a, "—"))),
@@ -1807,12 +1920,18 @@ server <- function(input, output, session) {
           # Central VS Badge
           div(class = "vs-badge-container", div(class = "vs-badge", "VS")),
           
-          # Player B Card
+          # Player B Card with Franchise Crest
           div(
             class = paste("player-card", ifelse(wins_b > wins_a, "winner", "")),
             if (wins_b > wins_a) span(class = "leader-pill", "🏆 DUEL LEADER"),
-            tags$h3(style = "color: #38BDF8; margin: 0 0 4px 0;", p_b),
-            tags$p(style = "color: #94A3B8; font-size: 0.85rem; margin-bottom: 16px;", paste("Franchise:", team_b)),
+            div(
+              class = "player-card-header-row",
+              if (file.exists(paste0("www/teams/", first_team_b, ".svg"))) tags$img(src = paste0("teams/", first_team_b, ".svg"), class = "player-card-team-logo") else NULL,
+              div(
+                tags$h3(style = "color: #FFB800; margin: 0;", p_b),
+                tags$p(style = "color: #94A3B8; font-size: 0.85rem; margin: 2px 0 0 0;", paste("Franchise:", team_b))
+              )
+            ),
             div(class = "metric-row", span(class = "metric-label", "Total Runs"), span(class = paste("metric-val", ifelse(runs_b >= runs_a, "lead", "")), runs_b)),
             div(class = "metric-row", span(class = "metric-label", "Strike Rate"), span(class = paste("metric-val", ifelse(sr_b >= sr_a, "lead", "")), sr_b)),
             div(class = "metric-row", span(class = "metric-label", "Batting Average"), span(class = paste("metric-val", ifelse(avg_b >= avg_a, "lead", "")), ifelse(avg_b > 0, avg_b, "—"))),
@@ -1821,7 +1940,7 @@ server <- function(input, output, session) {
           )
         ),
         
-        # Radar & Metrics Table Row
+        # Radar & Metrics Table Row (Light Card Background)
         fluidRow(
           column(
             width = 6,
@@ -1836,7 +1955,7 @@ server <- function(input, output, session) {
                 ),
                 span(class = "card-action-pill", "Radar Model")
               ),
-              withSpinner(plotlyOutput("plot_comp_radar", height = "360px"), type = 4, color = "#FF8A00")
+              withSpinner(plotlyOutput("plot_comp_radar", height = "360px"), type = 4, color = "#0090DF")
             )
           ),
           column(
@@ -1852,7 +1971,10 @@ server <- function(input, output, session) {
                 ),
                 span(class = "card-action-pill", "Scorecard")
               ),
-              DTOutput("table_comp_scorecard")
+              div(
+                class = "table-responsive-container",
+                DTOutput("table_comp_scorecard")
+              )
             )
           )
         )
@@ -1882,7 +2004,9 @@ server <- function(input, output, session) {
       dot_b <- if (nrow(stat_b) > 0) stat_b$dot_pct else 0
       team_b <- if (nrow(stat_b) > 0) stat_b$teams else "—"
       
-      # Determine bowling leaders (lower is better for econ, avg, sr)
+      first_team_a <- tolower(trimws(strsplit(team_a, ",")[[1]][1]))
+      first_team_b <- tolower(trimws(strsplit(team_b, ",")[[1]][1]))
+      
       w_a <- sum(c(
         wkts_a > wkts_b,
         (!is.na(econ_a) && !is.na(econ_b) && econ_a < econ_b) || (!is.na(econ_a) && is.na(econ_b)),
@@ -1905,8 +2029,14 @@ server <- function(input, output, session) {
           div(
             class = paste("player-card", ifelse(w_a > w_b, "winner", "")),
             if (w_a > w_b) span(class = "leader-pill", "🏆 DUEL LEADER"),
-            tags$h3(style = "color: #FF8A00; margin: 0 0 4px 0;", p_a),
-            tags$p(style = "color: #94A3B8; font-size: 0.85rem; margin-bottom: 16px;", paste("Franchise:", team_a)),
+            div(
+              class = "player-card-header-row",
+              if (file.exists(paste0("www/teams/", first_team_a, ".svg"))) tags$img(src = paste0("teams/", first_team_a, ".svg"), class = "player-card-team-logo") else NULL,
+              div(
+                tags$h3(style = "color: #0090DF; margin: 0;", p_a),
+                tags$p(style = "color: #94A3B8; font-size: 0.85rem; margin: 2px 0 0 0;", paste("Franchise:", team_a))
+              )
+            ),
             div(class = "metric-row", span(class = "metric-label", "Credited Wickets"), span(class = paste("metric-val", ifelse(wkts_a >= wkts_b, "lead", "")), wkts_a)),
             div(class = "metric-row", span(class = "metric-label", "Economy Rate"), span(class = paste("metric-val", ifelse(!is.na(econ_a) && (is.na(econ_b) || econ_a <= econ_b), "lead", "")), ifelse(!is.na(econ_a), econ_a, "—"))),
             div(class = "metric-row", span(class = "metric-label", "Bowling Average"), span(class = paste("metric-val", ifelse(!is.na(avg_a) && (is.na(avg_b) || avg_a <= avg_b), "lead", "")), ifelse(!is.na(avg_a), avg_a, "—"))),
@@ -1921,8 +2051,14 @@ server <- function(input, output, session) {
           div(
             class = paste("player-card", ifelse(w_b > w_a, "winner", "")),
             if (w_b > w_a) span(class = "leader-pill", "🏆 DUEL LEADER"),
-            tags$h3(style = "color: #38BDF8; margin: 0 0 4px 0;", p_b),
-            tags$p(style = "color: #94A3B8; font-size: 0.85rem; margin-bottom: 16px;", paste("Franchise:", team_b)),
+            div(
+              class = "player-card-header-row",
+              if (file.exists(paste0("www/teams/", first_team_b, ".svg"))) tags$img(src = paste0("teams/", first_team_b, ".svg"), class = "player-card-team-logo") else NULL,
+              div(
+                tags$h3(style = "color: #FFB800; margin: 0;", p_b),
+                tags$p(style = "color: #94A3B8; font-size: 0.85rem; margin: 2px 0 0 0;", paste("Franchise:", team_b))
+              )
+            ),
             div(class = "metric-row", span(class = "metric-label", "Credited Wickets"), span(class = paste("metric-val", ifelse(wkts_b >= wkts_a, "lead", "")), wkts_b)),
             div(class = "metric-row", span(class = "metric-label", "Economy Rate"), span(class = paste("metric-val", ifelse(!is.na(econ_b) && (is.na(econ_a) || econ_b <= econ_a), "lead", "")), ifelse(!is.na(econ_b), econ_b, "—"))),
             div(class = "metric-row", span(class = "metric-label", "Bowling Average"), span(class = paste("metric-val", ifelse(!is.na(avg_b) && (is.na(avg_a) || avg_b <= avg_a), "lead", "")), ifelse(!is.na(avg_b), avg_b, "—"))),
@@ -1931,7 +2067,7 @@ server <- function(input, output, session) {
           )
         ),
         
-        # Radar & Metrics Table Row
+        # Radar & Metrics Table Row (Light Card Background)
         fluidRow(
           column(
             width = 6,
@@ -1946,7 +2082,7 @@ server <- function(input, output, session) {
                 ),
                 span(class = "card-action-pill", "Radar Model")
               ),
-              withSpinner(plotlyOutput("plot_comp_radar", height = "360px"), type = 4, color = "#FF8A00")
+              withSpinner(plotlyOutput("plot_comp_radar", height = "360px"), type = 4, color = "#0090DF")
             )
           ),
           column(
@@ -1962,7 +2098,10 @@ server <- function(input, output, session) {
                 ),
                 span(class = "card-action-pill", "Scorecard")
               ),
-              DTOutput("table_comp_scorecard")
+              div(
+                class = "table-responsive-container",
+                DTOutput("table_comp_scorecard")
+              )
             )
           )
         )
@@ -1970,7 +2109,7 @@ server <- function(input, output, session) {
     }
   })
   
-  # Radar Chart Rendering (Batting & Bowling)
+  # Radar Chart Rendering (Light, Spacious, Attractive Polar Layout)
   output$plot_comp_radar <- renderPlotly({
     req(input$comp_player_a, input$comp_player_b, input$comp_mode)
     p_a <- input$comp_player_a
@@ -1997,7 +2136,6 @@ server <- function(input, output, session) {
       bpct_b <- if (nrow(stat_b) > 0) stat_b$boundary_pct else 0
       balls_b <- if (nrow(stat_b) > 0) stat_b$balls else 0
       
-      # Season scale limits
       max_runs <- max(batting_summary$runs)
       max_balls <- max(batting_summary$balls)
       max_bnd <- max(batting_summary$fours + batting_summary$sixes)
@@ -2020,11 +2158,10 @@ server <- function(input, output, session) {
         normalize_metric(balls_b, 0, max_balls)
       )
       
-      hover_a <- paste0(cats, "<br><b>", p_a, ": </b>", c(runs_a, paste0(sr_a, " SR"), avg_a, bnd_a, paste0(bpct_a, "%"), balls_a), "<br>Index: ", norm_a, "/100")
-      hover_b <- paste0(cats, "<br><b>", p_b, ": </b>", c(runs_b, paste0(sr_b, " SR"), avg_b, bnd_b, paste0(bpct_b, "%"), balls_b), "<br>Index: ", norm_b, "/100")
+      hover_a <- paste0(cats, "<br><b>", p_a, ": </b>", c(runs_a, paste0(sr_a, " SR"), avg_a, bnd_a, paste0(bpct_a, "%"), balls_a), "<br>Score: ", norm_a, "/100")
+      hover_b <- paste0(cats, "<br><b>", p_b, ": </b>", c(runs_b, paste0(sr_b, " SR"), avg_b, bnd_b, paste0(bpct_b, "%"), balls_b), "<br>Score: ", norm_b, "/100")
       
     } else {
-      # Bowling Radar
       stat_a <- bowling_summary %>% filter(bowler == p_a)
       stat_b <- bowling_summary %>% filter(bowler == p_b)
       
@@ -2065,8 +2202,8 @@ server <- function(input, output, session) {
         normalize_metric(overs_b, 0, max_overs)
       )
       
-      hover_a <- paste0(cats, "<br><b>", p_a, ": </b>", c(wkts_a, econ_a, avg_a, sr_a, paste0(dot_a, "%"), overs_a), "<br>Index: ", norm_a, "/100")
-      hover_b <- paste0(cats, "<br><b>", p_b, ": </b>", c(wkts_b, econ_b, avg_b, sr_b, paste0(dot_b, "%"), overs_b), "<br>Index: ", norm_b, "/100")
+      hover_a <- paste0(cats, "<br><b>", p_a, ": </b>", c(wkts_a, econ_a, avg_a, sr_a, paste0(dot_a, "%"), overs_a), "<br>Score: ", norm_a, "/100")
+      hover_b <- paste0(cats, "<br><b>", p_b, ": </b>", c(wkts_b, econ_b, avg_b, sr_b, paste0(dot_b, "%"), overs_b), "<br>Score: ", norm_b, "/100")
     }
     
     p <- plot_ly(type = "scatterpolar", mode = "lines+markers", fill = "toself") %>%
@@ -2077,9 +2214,9 @@ server <- function(input, output, session) {
         mode = "lines+markers",
         text = c(hover_a, hover_a[1]),
         hoverinfo = "text",
-        line = list(color = "#FF8A00", width = 2.5),
-        marker = list(color = "#FF8A00", size = 6),
-        fillcolor = "rgba(255, 138, 0, 0.22)"
+        line = list(color = "#0090DF", width = 2.8),
+        marker = list(color = "#0090DF", size = 7),
+        fillcolor = "rgba(0, 144, 223, 0.22)"
       ) %>%
       add_trace(
         r = c(norm_b, norm_b[1]),
@@ -2088,31 +2225,37 @@ server <- function(input, output, session) {
         mode = "lines+markers",
         text = c(hover_b, hover_b[1]),
         hoverinfo = "text",
-        line = list(color = "#38BDF8", width = 2.5),
-        marker = list(color = "#38BDF8", size = 6),
-        fillcolor = "rgba(56, 189, 248, 0.22)"
+        line = list(color = "#F59E0B", width = 2.8),
+        marker = list(color = "#F59E0B", size = 7),
+        fillcolor = "rgba(245, 158, 11, 0.22)"
       ) %>%
       layout(
         polar = list(
-          bgcolor = "#1B2330",
+          bgcolor = "#F8FAFC",
           radialaxis = list(
             visible = TRUE,
             range = c(0, 100),
-            color = "#94A3B8",
-            gridcolor = "#2B3645",
+            color = "#64748B",
+            gridcolor = "#E2E8F0",
             tickfont = list(size = 9, color = "#64748B")
           ),
           angularaxis = list(
-            color = "#F8FAFC",
-            gridcolor = "#2B3645",
-            tickfont = list(size = 11, color = "#F8FAFC")
+            color = "#0F172A",
+            gridcolor = "#E2E8F0",
+            tickfont = list(size = 11, color = "#0F172A", family = "Inter, sans-serif")
           )
         ),
-        paper_bgcolor = "#1B2330",
-        plot_bgcolor = "#1B2330",
-        font = list(color = "#F8FAFC", family = "Inter, sans-serif"),
+        paper_bgcolor = "#FFFFFF",
+        plot_bgcolor = "#F8FAFC",
+        font = list(color = "#0F172A", family = "Inter, sans-serif"),
         showlegend = TRUE,
-        legend = list(orientation = "h", x = 0.2, y = -0.15)
+        legend = list(
+          orientation = "h", 
+          x = 0.2, 
+          y = -0.15,
+          font = list(color = "#0F172A", size = 11),
+          bgcolor = "rgba(255, 255, 255, 0.9)"
+        )
       ) %>%
       config(displayModeBar = FALSE, responsive = TRUE)
     
@@ -2132,25 +2275,18 @@ server <- function(input, output, session) {
       
       runs_a <- if (nrow(stat_a) > 0) stat_a$runs else 0
       runs_b <- if (nrow(stat_b) > 0) stat_b$runs else 0
-      
       balls_a <- if (nrow(stat_a) > 0) stat_a$balls else 0
       balls_b <- if (nrow(stat_b) > 0) stat_b$balls else 0
-      
       sr_a <- if (nrow(stat_a) > 0) stat_a$strike_rate else 0
       sr_b <- if (nrow(stat_b) > 0) stat_b$strike_rate else 0
-      
       avg_a <- if (nrow(stat_a) > 0 && !is.na(stat_a$batting_avg)) stat_a$batting_avg else 0
       avg_b <- if (nrow(stat_b) > 0 && !is.na(stat_b$batting_avg)) stat_b$batting_avg else 0
-      
       fours_a <- if (nrow(stat_a) > 0) stat_a$fours else 0
       fours_b <- if (nrow(stat_b) > 0) stat_b$fours else 0
-      
       sixes_a <- if (nrow(stat_a) > 0) stat_a$sixes else 0
       sixes_b <- if (nrow(stat_b) > 0) stat_b$sixes else 0
-      
       bpct_a <- if (nrow(stat_a) > 0) stat_a$boundary_pct else 0
       bpct_b <- if (nrow(stat_b) > 0) stat_b$boundary_pct else 0
-      
       matches_a <- if (nrow(stat_a) > 0) stat_a$matches else 0
       matches_b <- if (nrow(stat_b) > 0) stat_b$matches else 0
       
@@ -2170,28 +2306,21 @@ server <- function(input, output, session) {
         `Player B` = as.character(c(runs_b, balls_b, ifelse(avg_b > 0, avg_b, "—"), sr_b, fours_b, sixes_b, paste0(bpct_b, "%"), matches_b))
       )
     } else {
-      # Bowling Duel Scorecard
       stat_a <- bowling_summary %>% filter(bowler == p_a)
       stat_b <- bowling_summary %>% filter(bowler == p_b)
       
       wkts_a <- if (nrow(stat_a) > 0) stat_a$wickets else 0
       wkts_b <- if (nrow(stat_b) > 0) stat_b$wickets else 0
-      
       runs_a <- if (nrow(stat_a) > 0) stat_a$runs_conceded else 0
       runs_b <- if (nrow(stat_b) > 0) stat_b$runs_conceded else 0
-      
       balls_a <- if (nrow(stat_a) > 0) stat_a$legal_balls else 0
       balls_b <- if (nrow(stat_b) > 0) stat_b$legal_balls else 0
-      
       econ_a <- if (nrow(stat_a) > 0 && !is.na(stat_a$economy)) stat_a$economy else NA
       econ_b <- if (nrow(stat_b) > 0 && !is.na(stat_b$economy)) stat_b$economy else NA
-      
       avg_a <- if (nrow(stat_a) > 0 && !is.na(stat_a$bowling_avg)) stat_a$bowling_avg else NA
       avg_b <- if (nrow(stat_b) > 0 && !is.na(stat_b$bowling_avg)) stat_b$bowling_avg else NA
-      
       sr_a <- if (nrow(stat_a) > 0 && !is.na(stat_a$bowling_sr)) stat_a$bowling_sr else NA
       sr_b <- if (nrow(stat_b) > 0 && !is.na(stat_b$bowling_sr)) stat_b$bowling_sr else NA
-      
       dot_a <- if (nrow(stat_a) > 0) stat_a$dot_pct else 0
       dot_b <- if (nrow(stat_b) > 0) stat_b$dot_pct else 0
       
@@ -2211,7 +2340,6 @@ server <- function(input, output, session) {
       )
     }
     
-    # Rename columns to show player names
     colnames(score_df)[2] <- p_a
     colnames(score_df)[4] <- p_b
     
@@ -2221,6 +2349,8 @@ server <- function(input, output, session) {
         dom = "t",
         paging = FALSE,
         ordering = FALSE,
+        scrollX = TRUE,
+        autoWidth = TRUE,
         columnDefs = list(list(className = "dt-center", targets = "_all"))
       ),
       rownames = FALSE,

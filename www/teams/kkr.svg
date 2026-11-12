@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+  <defs>
+    <linearGradient id="kkrGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#3B0764;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#581C87;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <path d="M50 5 L88 20 L78 68 L50 95 L22 68 L12 20 Z" fill="url(#kkrGrad)" stroke="#F59E0B" stroke-width="3" />
+  <!-- Knight Helmet & Crest -->
+  <path d="M42 22 Q50 14 58 22 L62 36 L38 36 Z" fill="#F59E0B" />
+  <path d="M38 38 L62 38 L58 56 Q50 64 42 56 Z" fill="#E2E8F0" stroke="#F59E0B" stroke-width="1.5" />
+  <line x1="43" y1="46" x2="57" y2="46" stroke="#3B0764" stroke-width="2.5" />
+  <text x="50" y="80" font-family="'Inter', Arial, sans-serif" font-weight="900" font-size="15" fill="#F59E0B" text-anchor="middle">KKR</text>
+</svg>

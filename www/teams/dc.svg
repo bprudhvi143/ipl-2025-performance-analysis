@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+  <defs>
+    <linearGradient id="dcGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1D4ED8;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0B2545;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <path d="M50 5 L88 20 L78 68 L50 95 L22 68 L12 20 Z" fill="url(#dcGrad)" stroke="#DC2626" stroke-width="3" />
+  <!-- Tiger/Dome Motif -->
+  <path d="M30 38 Q50 20 70 38 L65 58 L50 52 L35 58 Z" fill="#DC2626" />
+  <circle cx="50" cy="38" r="7" fill="#FBBF24" />
+  <path d="M42 46 L50 42 L58 46 L50 50 Z" fill="#FFFFFF" />
+  <text x="50" y="80" font-family="'Inter', Arial, sans-serif" font-weight="900" font-size="16" fill="#FFFFFF" text-anchor="middle">DC</text>
+</svg>

@@ -95,22 +95,22 @@ The platform adheres strictly to official cricket laws and analytical standards:
 
 ---
 
-## 🎨 Design System & Color Palette
+## 🎨 Official IPL Brand Design System & Color Palette
 
-Designed with inspiration from premier sports intelligence platforms:
+Designed using the official IPL logo color identity:
 
-| UI Component | Hex Code | Visual Sample |
+| UI Component | Hex Code | Visual Sample & Description |
 | :--- | :--- | :--- |
-| **Main Canvas Background** | `#10141D` | Deep Charcoal |
-| **Sidebar Navigation** | `#141B26` | Deep Navy |
-| **Card Surface** | `#1B2330` | Midnight Slate |
-| **Elevated Card Surface** | `#222D3B` | Elevated Slate |
-| **Primary Accent (IPL Orange)**| `#FF8A00` | Vibrant Amber/Orange |
-| **Secondary Accent (Electric)**| `#38BDF8` | Cyan / Sky Blue |
-| **Positive Metric Indicator**  | `#22C55E` | Emerald Green |
-| **Negative / Conceded Indicator**| `#EF4444` | Crimson Red |
-| **Borders & Dividers** | `#2B3645` | Subtle Border |
-| **Primary Typography** | `#F8FAFC` | Inter / System Sans |
+| **IPL Electric Swoosh Blue** | `#0090DF` | Dynamic curved stroke from the official IPL logo |
+| **IPL Royal Navy Blue** | `#1D428A` | Powerful batsman silhouette blue |
+| **IPL Trophy Gold** | `#FFB800` | Golden champions highlight and secondary accent |
+| **Main Canvas Background** | `#0A101D` | Deep Midnight IPL Stadium Navy |
+| **Sidebar Navigation** | `#0E1726` | Deep Slate Navy |
+| **Card Surface** | `#152238` | Midnight Blue analytical card |
+| **Elevated Card Surface** | `#1C2E4C` | Interactive hover & active container |
+| **Borders & Dividers** | `#253B5C` | Crisp navy border containment |
+| **Primary Typography** | `#FFFFFF` | Inter / High-contrast white |
+| **Official Logo** | `www/ipl_logo.png` | Official IPL Batsman icon integrated in sidebar & topbar |
 
 ---
 
@@ -150,8 +150,10 @@ IPL_2025_Performance_Analysis/
 │   └── validation_tests.R                  # Automated statistical & reactive test suite
 │
 └── www/
-    ├── logo.svg                            # Custom cricket insignia branding
-    └── styles.css                          # Modern sports dark theme stylesheet
+    ├── ipl_logo.png                        # Official IPL batsman icon
+    ├── logo.png                            # Application logo asset
+    ├── logo.svg                            # Vector badge fallback
+    └── styles.css                          # Official IPL dark theme stylesheet
 ```
 
 ---
