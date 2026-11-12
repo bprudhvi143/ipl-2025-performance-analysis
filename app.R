@@ -5,7 +5,7 @@ library(shiny)
 library(tidyverse)
 
 # Load dataset
-ipl <- read.csv("ipl_2025_deliveries.csv")
+ipl <- read.csv("data/ipl_2025_deliveries.csv")
 
 # Precompute batting & bowling summaries
 batting_summary <- ipl %>%
