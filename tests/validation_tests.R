@@ -214,8 +214,24 @@ testServer(server, {
   # Player Comparison Studio (Identical selection validation)
   session$setInputs(comp_player_a = "Kohli", comp_player_b = "Kohli", comp_mode = "batting")
   stopifnot(!is.null(output$comp_validation_ui))
+  
+  # Player Analytics: Non-IPL 2025 Player (Instant search + Not Found warning)
+  session$setInputs(player_search = "Ben Stokes")
+  stopifnot(!is.null(output$player_analytics_ui))
+  stopifnot(grepl("Player Not Available in IPL 2025", as.character(output$player_analytics_ui$html)))
+  
+  # Player Analytics: Real Star Search via Alias / Full Name ("virat" -> Kohli)
+  session$setInputs(player_search = "virat")
+  stopifnot(!is.null(output$player_analytics_ui))
+  stopifnot(grepl("Virat Kohli", as.character(output$player_analytics_ui$html)))
+  stopifnot(grepl("Top order Batter", as.character(output$player_analytics_ui$html)))
+  
+  # Comparison Studio: Non-IPL 2025 Player Validation Warning
+  session$setInputs(comp_player_a_search = "Steve Smith", comp_player_b_search = "Virat Kohli")
+  stopifnot(!is.null(output$comp_validation_ui))
+  stopifnot(grepl("Player A Not Available in IPL 2025", as.character(output$comp_validation_ui$html)))
 })
-cat("        ✓ Shiny server integration verified: All 4 pages reactive pipelines passed.\n")
+cat("        ✓ Shiny server integration verified: All 4 pages, instant search, Cricbuzz profiles & fallback banners passed.\n")
 
 cat("\n====================================================================\n")
 cat(">>> ALL 7 TEST SUITES PASSED! STATISTICAL & REACTIVE INTEGRITY VERIFIED\n")

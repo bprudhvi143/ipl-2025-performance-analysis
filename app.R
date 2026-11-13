@@ -24,6 +24,9 @@ data_path <- if (file.exists("data/ipl_2025_deliveries.csv")) {
 }
 
 ipl <- read.csv(data_path, stringsAsFactors = FALSE)
+ipl$striker <- ifelse(ipl$striker == "Livingstone 1 run", "Livingstone", ipl$striker)
+ipl$bowler <- ifelse(ipl$bowler == "Livingstone 1 run", "Livingstone", ipl$bowler)
+ipl$player_dismissed <- ifelse(ipl$player_dismissed == "Livingstone 1 run", "Livingstone", ipl$player_dismissed)
 
 # Annotate delivery phases
 ipl <- ipl %>%
@@ -176,6 +179,225 @@ team_logo_html <- function(team_code, size = 22) {
 all_players <- sort(unique(c(batting_summary$striker, bowling_summary$bowler)))
 all_teams <- sort(unique(ipl$batting_team))
 all_seasons <- sort(unique(ipl$season))
+
+# ==============================================================================
+# Cricbuzz Player Profiles Database (Role & Style Metadata)
+# ==============================================================================
+cricbuzz_db <- list(
+  # Top Indian Batters & WKs
+  "Kohli" = list(full_name = "Virat Kohli", role = "Top order Batter", bat_style = "Right hand Bat", bowl_style = "Right arm Medium", aliases = c("Virat Kohli", "V Kohli")),
+  "Rohit" = list(full_name = "Rohit Sharma", role = "Top order Batter", bat_style = "Right hand Bat", bowl_style = "Right arm Offbreak", aliases = c("Rohit Sharma", "RG Sharma")),
+  "Sai Sudharsan" = list(full_name = "B Sai Sudharsan", role = "Top order Batter", bat_style = "Left hand Bat", bowl_style = "Right arm Legbreak", aliases = c("Sai Sudharsan", "Sudharsan")),
+  "Suryakumar Yadav" = list(full_name = "Suryakumar Yadav", role = "Top order Batter", bat_style = "Right hand Bat", bowl_style = "Right arm Offbreak", aliases = c("Suryakumar Yadav", "SKY", "Surya")),
+  "Shubman Gill" = list(full_name = "Shubman Gill", role = "Top order Batter", bat_style = "Right hand Bat", bowl_style = "Right arm Offbreak", aliases = c("Shubman Gill", "S Gill", "Gill")),
+  "Jaiswal" = list(full_name = "Yashasvi Jaiswal", role = "Top order Batter", bat_style = "Left hand Bat", bowl_style = "Right arm Legbreak", aliases = c("Yashasvi Jaiswal", "Y Jaiswal")),
+  "Gaikwad" = list(full_name = "Ruturaj Gaikwad", role = "Top order Batter", bat_style = "Right hand Bat", bowl_style = "Right arm Offbreak", aliases = c("Ruturaj Gaikwad", "R Gaikwad")),
+  "Rajat Patidar" = list(full_name = "Rajat Patidar", role = "Top order Batter", bat_style = "Right hand Bat", bowl_style = "Right arm Offbreak", aliases = c("Rajat Patidar")),
+  "Shreyas Iyer" = list(full_name = "Shreyas Iyer", role = "Top order Batter", bat_style = "Right hand Bat", bowl_style = "Right arm Legbreak", aliases = c("Shreyas Iyer", "S Iyer")),
+  "Tilak Varma" = list(full_name = "Tilak Varma", role = "Top order Batter", bat_style = "Left hand Bat", bowl_style = "Right arm Offbreak", aliases = c("Tilak Varma")),
+  "Rinku Singh" = list(full_name = "Rinku Singh", role = "Middle order Batter", bat_style = "Left hand Bat", bowl_style = "Right arm Offbreak", aliases = c("Rinku Singh")),
+  "Riyan Parag" = list(full_name = "Riyan Parag", role = "Middle order Batter", bat_style = "Right hand Bat", bowl_style = "Right arm Legbreak", aliases = c("Riyan Parag", "Parag")),
+  "Padikkal" = list(full_name = "Devdutt Padikkal", role = "Top order Batter", bat_style = "Left hand Bat", bowl_style = "Right arm Offbreak", aliases = c("Devdutt Padikkal", "D Padikkal")),
+  "Rahane" = list(full_name = "Ajinkya Rahane", role = "Top order Batter", bat_style = "Right hand Bat", bowl_style = "Right arm Medium", aliases = c("Ajinkya Rahane", "A Rahane")),
+  "Tripathi" = list(full_name = "Rahul Tripathi", role = "Top order Batter", bat_style = "Right hand Bat", bowl_style = "Right arm Medium", aliases = c("Rahul Tripathi", "R Tripathi")),
+  "Prabhsimran" = list(full_name = "Prabhsimran Singh", role = "Top order Batter", bat_style = "Right hand Bat", bowl_style = "Right arm Offbreak", aliases = c("Prabhsimran Singh")),
+  "Ashutosh Sharma" = list(full_name = "Ashutosh Sharma", role = "Middle order Batter", bat_style = "Right hand Bat", bowl_style = "Right arm Medium", aliases = c("Ashutosh Sharma")),
+  "Shashank Singh" = list(full_name = "Shashank Singh", role = "Middle order Batter", bat_style = "Right hand Bat", bowl_style = "Right arm Medium", aliases = c("Shashank Singh")),
+  "Nehal Wadhera" = list(full_name = "Nehal Wadhera", role = "Middle order Batter", bat_style = "Left hand Bat", bowl_style = "Right arm Legbreak", aliases = c("Nehal Wadhera")),
+  "Naman Dhir" = list(full_name = "Naman Dhir", role = "Middle order Batter", bat_style = "Right hand Bat", bowl_style = "Right arm Offbreak", aliases = c("Naman Dhir")),
+  "Ayush Badoni" = list(full_name = "Ayush Badoni", role = "Middle order Batter", bat_style = "Right hand Bat", bowl_style = "Right arm Offbreak", aliases = c("Ayush Badoni")),
+  "Sameer Rizvi" = list(full_name = "Sameer Rizvi", role = "Middle order Batter", bat_style = "Right hand Bat", bowl_style = "Right arm Offbreak", aliases = c("Sameer Rizvi")),
+  "Shahrukh Khan" = list(full_name = "M Shahrukh Khan", role = "Middle order Batter", bat_style = "Right hand Bat", bowl_style = "Right arm Offbreak", aliases = c("Shahrukh Khan")),
+  "Abhinav Manohar" = list(full_name = "Abhinav Manohar", role = "Middle order Batter", bat_style = "Right hand Bat", bowl_style = "Right arm Legbreak", aliases = c("Abhinav Manohar")),
+  "Angkrish Raghuvanshi" = list(full_name = "Angkrish Raghuvanshi", role = "Top order Batter", bat_style = "Right hand Bat", bowl_style = "Slow Left arm Orthodox", aliases = c("Angkrish Raghuvanshi")),
+  
+  # Indian WKs
+  "Dhoni" = list(full_name = "MS Dhoni", role = "Wicketkeeper Batter", bat_style = "Right hand Bat", bowl_style = "Right arm Medium", aliases = c("MS Dhoni", "M.S. Dhoni", "Mahendra Singh Dhoni")),
+  "Pant" = list(full_name = "Rishabh Pant", role = "Wicketkeeper Batter", bat_style = "Left hand Bat", bowl_style = "Right arm Medium", aliases = c("Rishabh Pant", "R Pant")),
+  "Rahul" = list(full_name = "KL Rahul", role = "Wicketkeeper Batter", bat_style = "Right hand Bat", bowl_style = "Right arm Medium", aliases = c("KL Rahul", "K.L. Rahul")),
+  "Samson" = list(full_name = "Sanju Samson", role = "Wicketkeeper Batter", bat_style = "Right hand Bat", bowl_style = "Right arm Offbreak", aliases = c("Sanju Samson", "S Samson")),
+  "Ishan Kishan" = list(full_name = "Ishan Kishan", role = "Wicketkeeper Batter", bat_style = "Left hand Bat", bowl_style = "Right arm Legbreak", aliases = c("Ishan Kishan")),
+  "Jitesh Sharma" = list(full_name = "Jitesh Sharma", role = "Wicketkeeper Batter", bat_style = "Right hand Bat", bowl_style = "Right arm Offbreak", aliases = c("Jitesh Sharma")),
+  "Dhruv Jurel" = list(full_name = "Dhruv Jurel", role = "Wicketkeeper Batter", bat_style = "Right hand Bat", bowl_style = "Right arm Offbreak", aliases = c("Dhruv Jurel")),
+  "Abishek Porel" = list(full_name = "Abishek Porel", role = "Wicketkeeper Batter", bat_style = "Left hand Bat", bowl_style = "Right arm Offbreak", aliases = c("Abishek Porel")),
+  
+  # Indian Allrounders
+  "Hardik Pandya" = list(full_name = "Hardik Pandya", role = "Allrounder", bat_style = "Right hand Bat", bowl_style = "Right arm Fast Medium", aliases = c("Hardik Pandya", "H Pandya")),
+  "Jadeja" = list(full_name = "Ravindra Jadeja", role = "Allrounder", bat_style = "Left hand Bat", bowl_style = "Slow Left arm Orthodox", aliases = c("Ravindra Jadeja", "R Jadeja", "Jaddu")),
+  "Axar" = list(full_name = "Axar Patel", role = "Allrounder", bat_style = "Left hand Bat", bowl_style = "Slow Left arm Orthodox", aliases = c("Axar Patel", "A Patel")),
+  "Ashwin" = list(full_name = "Ravichandran Ashwin", role = "Bowling Allrounder", bat_style = "Right hand Bat", bowl_style = "Right arm Offbreak", aliases = c("Ravichandran Ashwin", "R Ashwin")),
+  "Abhishek Sharma" = list(full_name = "Abhishek Sharma", role = "Allrounder", bat_style = "Left hand Bat", bowl_style = "Slow Left arm Orthodox", aliases = c("Abhishek Sharma")),
+  "Shivam Dube" = list(full_name = "Shivam Dube", role = "Allrounder", bat_style = "Left hand Bat", bowl_style = "Right arm Medium", aliases = c("Shivam Dube", "S Dube")),
+  "Nitish Reddy" = list(full_name = "Nitish Kumar Reddy", role = "Allrounder", bat_style = "Right hand Bat", bowl_style = "Right arm Fast Medium", aliases = c("Nitish Reddy", "NK Reddy")),
+  "Krunal Pandya" = list(full_name = "Krunal Pandya", role = "Allrounder", bat_style = "Left hand Bat", bowl_style = "Slow Left arm Orthodox", aliases = c("Krunal Pandya", "K Pandya")),
+  "Washington Sundar" = list(full_name = "Washington Sundar", role = "Allrounder", bat_style = "Left hand Bat", bowl_style = "Right arm Offbreak", aliases = c("Washington Sundar", "W Sundar")),
+  "Shahbaz Ahmed" = list(full_name = "Shahbaz Ahmed", role = "Allrounder", bat_style = "Left hand Bat", bowl_style = "Slow Left arm Orthodox", aliases = c("Shahbaz Ahmed")),
+  "Ramandeep Singh" = list(full_name = "Ramandeep Singh", role = "Allrounder", bat_style = "Right hand Bat", bowl_style = "Right arm Medium", aliases = c("Ramandeep Singh")),
+  "Rahul Tewatia" = list(full_name = "Rahul Tewatia", role = "Allrounder", bat_style = "Left hand Bat", bowl_style = "Right arm Legbreak", aliases = c("Rahul Tewatia")),
+  "Harpreet Brar" = list(full_name = "Harpreet Brar", role = "Bowling Allrounder", bat_style = "Left hand Bat", bowl_style = "Slow Left arm Orthodox", aliases = c("Harpreet Brar")),
+  
+  # Indian Bowlers
+  "Bumrah" = list(full_name = "Jasprit Bumrah", role = "Bowler", bat_style = "Right hand Bat", bowl_style = "Right arm Fast", aliases = c("Jasprit Bumrah", "J Bumrah")),
+  "Siraj" = list(full_name = "Mohammed Siraj", role = "Bowler", bat_style = "Right hand Bat", bowl_style = "Right arm Fast", aliases = c("Mohammed Siraj", "M Siraj")),
+  "Shami" = list(full_name = "Mohammed Shami", role = "Bowler", bat_style = "Right hand Bat", bowl_style = "Right arm Fast", aliases = c("Mohammed Shami", "M Shami")),
+  "Prasidh" = list(full_name = "Prasidh Krishna", role = "Bowler", bat_style = "Right hand Bat", bowl_style = "Right arm Fast", aliases = c("Prasidh Krishna", "P Krishna")),
+  "Arshdeep Singh" = list(full_name = "Arshdeep Singh", role = "Bowler", bat_style = "Left hand Bat", bowl_style = "Left arm Fast Medium", aliases = c("Arshdeep Singh", "A Singh")),
+  "Chahal" = list(full_name = "Yuzvendra Chahal", role = "Bowler", bat_style = "Right hand Bat", bowl_style = "Right arm Legbreak", aliases = c("Yuzvendra Chahal", "Y Chahal")),
+  "Kuldeep Yadav" = list(full_name = "Kuldeep Yadav", role = "Bowler", bat_style = "Left hand Bat", bowl_style = "Left arm Chinaman", aliases = c("Kuldeep Yadav", "K Yadav")),
+  "Varun Chakaravarthy" = list(full_name = "Varun Chakaravarthy", role = "Bowler", bat_style = "Right hand Bat", bowl_style = "Right arm Mystery Spin", aliases = c("Varun Chakaravarthy", "Varun Chakravarthy")),
+  "Mayank Yadav" = list(full_name = "Mayank Yadav", role = "Bowler", bat_style = "Right hand Bat", bowl_style = "Right arm Express Fast", aliases = c("Mayank Yadav")),
+  "Harshit Rana" = list(full_name = "Harshit Rana", role = "Bowler", bat_style = "Right hand Bat", bowl_style = "Right arm Fast", aliases = c("Harshit Rana")),
+  "Harshal Patel" = list(full_name = "Harshal Patel", role = "Bowler", bat_style = "Right hand Bat", bowl_style = "Right arm Fast Medium", aliases = c("Harshal Patel")),
+  "Avesh Khan" = list(full_name = "Avesh Khan", role = "Bowler", bat_style = "Right hand Bat", bowl_style = "Right arm Fast", aliases = c("Avesh Khan")),
+  "Khaleel Ahmed" = list(full_name = "Khaleel Ahmed", role = "Bowler", bat_style = "Right hand Bat", bowl_style = "Left arm Fast Medium", aliases = c("Khaleel Ahmed")),
+  "Mukesh Kumar" = list(full_name = "Mukesh Kumar", role = "Bowler", bat_style = "Right hand Bat", bowl_style = "Right arm Fast Medium", aliases = c("Mukesh Kumar")),
+  "T Natarajan" = list(full_name = "T Natarajan", role = "Bowler", bat_style = "Left hand Bat", bowl_style = "Left arm Fast Medium", aliases = c("T Natarajan", "Natarajan")),
+  "Yash Dayal" = list(full_name = "Yash Dayal", role = "Bowler", bat_style = "Left hand Bat", bowl_style = "Left arm Fast Medium", aliases = c("Yash Dayal")),
+  "Mohit Sharma" = list(full_name = "Mohit Sharma", role = "Bowler", bat_style = "Right hand Bat", bowl_style = "Right arm Fast Medium", aliases = c("Mohit Sharma")),
+  "Sandeep Sharma" = list(full_name = "Sandeep Sharma", role = "Bowler", bat_style = "Right hand Bat", bowl_style = "Right arm Medium", aliases = c("Sandeep Sharma")),
+  "Tushar Deshpande" = list(full_name = "Tushar Deshpande", role = "Bowler", bat_style = "Right hand Bat", bowl_style = "Right arm Fast Medium", aliases = c("Tushar Deshpande")),
+  "Vaibhav Arora" = list(full_name = "Vaibhav Arora", role = "Bowler", bat_style = "Right hand Bat", bowl_style = "Right arm Fast Medium", aliases = c("Vaibhav Arora")),
+  "Ravi Bishnoi" = list(full_name = "Ravi Bishnoi", role = "Bowler", bat_style = "Right hand Bat", bowl_style = "Right arm Legbreak", aliases = c("Ravi Bishnoi")),
+  "Sai Kishore" = list(full_name = "R Sai Kishore", role = "Bowler", bat_style = "Left hand Bat", bowl_style = "Slow Left arm Orthodox", aliases = c("R Sai Kishore", "Sai Kishore")),
+  "Karn Sharma" = list(full_name = "Karn Sharma", role = "Bowler", bat_style = "Left hand Bat", bowl_style = "Right arm Legbreak", aliases = c("Karn Sharma")),
+  "Suyash Sharma" = list(full_name = "Suyash Sharma", role = "Bowler", bat_style = "Right hand Bat", bowl_style = "Right arm Legbreak", aliases = c("Suyash Sharma")),
+  "Rahul Chahar" = list(full_name = "Rahul Chahar", role = "Bowler", bat_style = "Right hand Bat", bowl_style = "Right arm Legbreak", aliases = c("Rahul Chahar")),
+  "Bhuvneshwar" = list(full_name = "Bhuvneshwar Kumar", role = "Bowler", bat_style = "Right hand Bat", bowl_style = "Right arm Medium", aliases = c("Bhuvneshwar Kumar", "B Kumar")),
+  "Chahar" = list(full_name = "Deepak Chahar", role = "Bowler", bat_style = "Right hand Bat", bowl_style = "Right arm Medium", aliases = c("Deepak Chahar", "D Chahar")),
+  "Ishant" = list(full_name = "Ishant Sharma", role = "Bowler", bat_style = "Right hand Bat", bowl_style = "Right arm Fast Medium", aliases = c("Ishant Sharma", "I Sharma")),
+  "Yash Thakur" = list(full_name = "Yash Thakur", role = "Bowler", bat_style = "Right hand Bat", bowl_style = "Right arm Fast Medium", aliases = c("Yash Thakur")),
+  "Simarjeet Singh" = list(full_name = "Simarjeet Singh", role = "Bowler", bat_style = "Right hand Bat", bowl_style = "Right arm Fast Medium", aliases = c("Simarjeet Singh")),
+  
+  # Overseas Stars
+  "Head" = list(full_name = "Travis Head", role = "Top order Batter", bat_style = "Left hand Bat", bowl_style = "Right arm Offbreak", aliases = c("Travis Head", "T Head")),
+  "Klaasen" = list(full_name = "Heinrich Klaasen", role = "Wicketkeeper Batter", bat_style = "Right hand Bat", bowl_style = "Right arm Offbreak", aliases = c("Heinrich Klaasen", "H Klaasen")),
+  "Narine" = list(full_name = "Sunil Narine", role = "Bowling Allrounder", bat_style = "Left hand Bat", bowl_style = "Right arm Offbreak", aliases = c("Sunil Narine", "S Narine")),
+  "Russell" = list(full_name = "Andre Russell", role = "Allrounder", bat_style = "Right hand Bat", bowl_style = "Right arm Fast", aliases = c("Andre Russell", "A Russell")),
+  "Rashid Khan" = list(full_name = "Rashid Khan", role = "Bowling Allrounder", bat_style = "Right hand Bat", bowl_style = "Right arm Legbreak", aliases = c("Rashid Khan", "Rashid")),
+  "Cummins" = list(full_name = "Pat Cummins", role = "Bowling Allrounder", bat_style = "Right hand Bat", bowl_style = "Right arm Fast", aliases = c("Pat Cummins", "P Cummins")),
+  "Boult" = list(full_name = "Trent Boult", role = "Bowler", bat_style = "Right hand Bat", bowl_style = "Left arm Fast", aliases = c("Trent Boult", "T Boult")),
+  "Rabada" = list(full_name = "Kagiso Rabada", role = "Bowler", bat_style = "Left hand Bat", bowl_style = "Right arm Fast", aliases = c("Kagiso Rabada", "K Rabada")),
+  "Noor Ahmad" = list(full_name = "Noor Ahmad", role = "Bowler", bat_style = "Right hand Bat", bowl_style = "Left arm Chinaman", aliases = c("Noor Ahmad", "Noor")),
+  "Pathirana" = list(full_name = "Matheesha Pathirana", role = "Bowler", bat_style = "Right hand Bat", bowl_style = "Right arm Fast (Sling)", aliases = c("Matheesha Pathirana", "M Pathirana")),
+  "Pooran" = list(full_name = "Nicholas Pooran", role = "Wicketkeeper Batter", bat_style = "Left hand Bat", bowl_style = "Right arm Offbreak", aliases = c("Nicholas Pooran", "N Pooran")),
+  "Miller" = list(full_name = "David Miller", role = "Middle order Batter", bat_style = "Left hand Bat", bowl_style = "Right arm Offbreak", aliases = c("David Miller", "D Miller")),
+  "Maxwell" = list(full_name = "Glenn Maxwell", role = "Allrounder", bat_style = "Right hand Bat", bowl_style = "Right arm Offbreak", aliases = c("Glenn Maxwell", "G Maxwell")),
+  "Stoinis" = list(full_name = "Marcus Stoinis", role = "Allrounder", bat_style = "Right hand Bat", bowl_style = "Right arm Fast Medium", aliases = c("Marcus Stoinis", "M Stoinis")),
+  "Buttler" = list(full_name = "Jos Buttler", role = "Wicketkeeper Batter", bat_style = "Right hand Bat", bowl_style = "Right arm Offbreak", aliases = c("Jos Buttler", "J Buttler")),
+  "de Kock" = list(full_name = "Quinton de Kock", role = "Wicketkeeper Batter", bat_style = "Left hand Bat", bowl_style = "Slow Left arm", aliases = c("Quinton de Kock", "Q de Kock")),
+  "du Plessis" = list(full_name = "Faf du Plessis", role = "Top order Batter", bat_style = "Right hand Bat", bowl_style = "Right arm Legbreak", aliases = c("Faf du Plessis", "F du Plessis")),
+  "Phil Salt" = list(full_name = "Phil Salt", role = "Wicketkeeper Batter", bat_style = "Right hand Bat", bowl_style = "Right arm Medium", aliases = c("Phil Salt", "P Salt")),
+  "Gurbaz" = list(full_name = "Rahmanullah Gurbaz", role = "Wicketkeeper Batter", bat_style = "Right hand Bat", bowl_style = "Right arm Medium", aliases = c("Rahmanullah Gurbaz", "R Gurbaz")),
+  "Stubbs" = list(full_name = "Tristan Stubbs", role = "Middle order Batter", bat_style = "Right hand Bat", bowl_style = "Right arm Offbreak", aliases = c("Tristan Stubbs", "T Stubbs")),
+  "Moeen Ali" = list(full_name = "Moeen Ali", role = "Allrounder", bat_style = "Left hand Bat", bowl_style = "Right arm Offbreak", aliases = c("Moeen Ali")),
+  "Livingstone" = list(full_name = "Liam Livingstone", role = "Allrounder", bat_style = "Right hand Bat", bowl_style = "Right arm Legbreak / Offbreak", aliases = c("Liam Livingstone", "L Livingstone")),
+  "Mitchell Marsh" = list(full_name = "Mitchell Marsh", role = "Allrounder", bat_style = "Right hand Bat", bowl_style = "Right arm Fast Medium", aliases = c("Mitchell Marsh", "M Marsh")),
+  "Marco Jansen" = list(full_name = "Marco Jansen", role = "Bowling Allrounder", bat_style = "Right hand Bat", bowl_style = "Left arm Fast", aliases = c("Marco Jansen", "M Jansen")),
+  "Will Jacks" = list(full_name = "Will Jacks", role = "Allrounder", bat_style = "Right hand Bat", bowl_style = "Right arm Offbreak", aliases = c("Will Jacks")),
+  "Tim David" = list(full_name = "Tim David", role = "Middle order Batter", bat_style = "Right hand Bat", bowl_style = "Right arm Offbreak", aliases = c("Tim David")),
+  "Shepherd" = list(full_name = "Romario Shepherd", role = "Allrounder", bat_style = "Right hand Bat", bowl_style = "Right arm Fast Medium", aliases = c("Romario Shepherd", "R Shepherd")),
+  "Theekshana" = list(full_name = "Maheesh Theekshana", role = "Bowler", bat_style = "Right hand Bat", bowl_style = "Right arm Offbreak", aliases = c("Maheesh Theekshana", "M Theekshana")),
+  "Hasaranga" = list(full_name = "Wanindu Hasaranga", role = "Bowling Allrounder", bat_style = "Right hand Bat", bowl_style = "Right arm Legbreak", aliases = c("Wanindu Hasaranga", "W Hasaranga")),
+  "Zampa" = list(full_name = "Adam Zampa", role = "Bowler", bat_style = "Right hand Bat", bowl_style = "Right arm Legbreak", aliases = c("Adam Zampa", "A Zampa")),
+  "Mujeeb" = list(full_name = "Mujeeb Ur Rahman", role = "Bowler", bat_style = "Right hand Bat", bowl_style = "Right arm Offbreak", aliases = c("Mujeeb Ur Rahman")),
+  "Mitchell Starc" = list(full_name = "Mitchell Starc", role = "Bowler", bat_style = "Left hand Bat", bowl_style = "Left arm Fast", aliases = c("Mitchell Starc", "M Starc")),
+  "Hazlewood" = list(full_name = "Josh Hazlewood", role = "Bowler", bat_style = "Left hand Bat", bowl_style = "Right arm Fast Medium", aliases = c("Josh Hazlewood", "J Hazlewood")),
+  "Gerald Coetzee" = list(full_name = "Gerald Coetzee", role = "Bowler", bat_style = "Right hand Bat", bowl_style = "Right arm Fast", aliases = c("Gerald Coetzee")),
+  "Ferguson" = list(full_name = "Lockie Ferguson", role = "Bowler", bat_style = "Right hand Bat", bowl_style = "Right arm Fast", aliases = c("Lockie Ferguson", "L Ferguson")),
+  "Nortje" = list(full_name = "Anrich Nortje", role = "Bowler", bat_style = "Right hand Bat", bowl_style = "Right arm Fast", aliases = c("Anrich Nortje", "A Nortje")),
+  "Spencer Johnson" = list(full_name = "Spencer Johnson", role = "Bowler", bat_style = "Left hand Bat", bowl_style = "Left arm Fast", aliases = c("Spencer Johnson")),
+  "Sam Curran" = list(full_name = "Sam Curran", role = "Allrounder", bat_style = "Left hand Bat", bowl_style = "Left arm Fast Medium", aliases = c("Sam Curran", "S Curran"))
+)
+
+# Cricbuzz Metadata Getter with intelligent squad fallback
+get_player_cricbuzz_meta <- function(player_code) {
+  if (is.null(player_code) || is.na(player_code) || player_code == "") {
+    return(list(
+      full_name = "Player",
+      role = "Player",
+      bat_style = "Right hand Bat",
+      bowl_style = "Right arm Medium",
+      franchise = "—"
+    ))
+  }
+  
+  meta <- if (player_code %in% names(cricbuzz_db)) {
+    cricbuzz_db[[player_code]]
+  } else {
+    bat_rec <- batting_summary %>% filter(striker == player_code)
+    bowl_rec <- bowling_summary %>% filter(bowler == player_code)
+    has_bat <- nrow(bat_rec) > 0 && bat_rec$balls >= 30
+    has_bowl <- nrow(bowl_rec) > 0 && bowl_rec$legal_balls >= 30
+    
+    inferred_role <- if (has_bat && has_bowl) {
+      "Allrounder"
+    } else if (has_bowl) {
+      "Bowler"
+    } else {
+      "Batter"
+    }
+    
+    list(
+      full_name = player_code,
+      role = inferred_role,
+      bat_style = "Right hand Bat",
+      bowl_style = "Right arm Fast Medium",
+      aliases = c(player_code)
+    )
+  }
+  
+  p_teams <- ipl %>% 
+    filter(striker == player_code | bowler == player_code) %>% 
+    pull(batting_team) %>% 
+    unique() %>% 
+    paste(collapse = ", ")
+  
+  if (p_teams == "") p_teams <- "IPL 2025 Squad"
+  meta$franchise <- p_teams
+  meta
+}
+
+# Autocomplete search suggestions (full names + aliases + dataset names)
+all_search_suggestions <- sort(unique(c(
+  all_players,
+  unlist(lapply(cricbuzz_db, function(x) x$full_name)),
+  unlist(lapply(cricbuzz_db, function(x) x$aliases))
+)))
+
+# Robust Player Name Resolver
+resolve_player <- function(query) {
+  if (is.null(query) || is.na(query)) return(NULL)
+  q <- trimws(tolower(as.character(query)))
+  if (q == "") return(NULL)
+  
+  # 1. Exact match in all_players
+  match_exact <- all_players[tolower(all_players) == q]
+  if (length(match_exact) > 0) return(match_exact[1])
+  
+  # 2. Match in Cricbuzz profiles
+  for (p in names(cricbuzz_db)) {
+    prof <- cricbuzz_db[[p]]
+    aliases <- tolower(c(p, prof$full_name, prof$aliases))
+    if (q %in% aliases) return(p)
+  }
+  
+  # 3. Word boundary match in all_players
+  partial_match <- all_players[grepl(paste0("\\b", q), tolower(all_players))]
+  if (length(partial_match) == 1) return(partial_match[1])
+  
+  # 4. Word boundary match in Cricbuzz profiles
+  for (p in names(cricbuzz_db)) {
+    prof <- cricbuzz_db[[p]]
+    aliases <- tolower(c(p, prof$full_name, prof$aliases))
+    if (any(grepl(paste0("\\b", q), aliases))) return(p)
+  }
+  
+  # 5. Substring match
+  sub_match <- all_players[grepl(q, tolower(all_players))]
+  if (length(sub_match) == 1) return(sub_match[1])
+  
+  return(NULL)
+}
 
 # Radar Normalization Helper
 normalize_metric <- function(val, min_val, max_val, invert = FALSE) {
@@ -334,6 +556,90 @@ ui <- page_fluid(
           # ====================================================================
           tabPanel(
             "overview",
+            # Tournament Summary & Honors Banner (Champions, Runners-Up & Stages)
+            div(
+              class = "tournament-summary-banner",
+              div(
+                class = "tournament-honor-grid",
+                # Champion Card: RCB
+                div(
+                  class = "honor-card champion-card",
+                  div(
+                    class = "honor-header",
+                    div(class = "honor-badge", "🏆 TOURNAMENT CHAMPIONS"),
+                    span(style = "color: #FFB800; font-size: 0.8rem; font-weight: 700;", "Final Winner (by 6 runs)")
+                  ),
+                  div(
+                    class = "honor-team",
+                    tags$img(src = "teams/rcb.png", class = "honor-logo", alt = "RCB"),
+                    div(
+                      div(style = "font-size: 1.25rem; font-weight: 800; color: #FFFFFF;", "Royal Challengers Bengaluru"),
+                      div(style = "font-size: 0.82rem; color: #94A3B8;", "RCB • 1st IPL Title")
+                    )
+                  ),
+                  div(
+                    class = "honor-score",
+                    "Final: 190/9",
+                    span(style = "font-size: 0.85rem; font-weight: 500; color: #CBD5E1; margin-left: 8px;", "(20.0 Overs)")
+                  ),
+                  div(class = "honor-note", "Defeated PBKS by 6 runs in Grand Final at Ahmedabad")
+                ),
+                
+                # Runners-Up Card: PBKS
+                div(
+                  class = "honor-card runner-card",
+                  div(
+                    class = "honor-header",
+                    div(class = "honor-badge", "🥈 TOURNAMENT RUNNERS-UP"),
+                    span(style = "color: #CBD5E1; font-size: 0.8rem; font-weight: 700;", "Grand Finalist")
+                  ),
+                  div(
+                    class = "honor-team",
+                    tags$img(src = "teams/pbks.png", class = "honor-logo", alt = "PBKS"),
+                    div(
+                      div(style = "font-size: 1.25rem; font-weight: 800; color: #FFFFFF;", "Punjab Kings"),
+                      div(style = "font-size: 0.82rem; color: #94A3B8;", "PBKS • Table Toppers (3,258 runs)")
+                    )
+                  ),
+                  div(
+                    class = "honor-score",
+                    "Final: 184/7",
+                    span(style = "font-size: 0.85rem; font-weight: 500; color: #CBD5E1; margin-left: 8px;", "(20.0 Overs)")
+                  ),
+                  div(class = "honor-note", "Chased 191 in Final • Season Runner-Up")
+                ),
+                
+                # Tournament Stages Card: League Stage & Playoffs
+                div(
+                  class = "honor-card stage-card",
+                  div(
+                    class = "honor-header",
+                    div(class = "honor-badge", "📅 TOURNAMENT STRUCTURE"),
+                    span(style = "color: #38BDF8; font-size: 0.8rem; font-weight: 700;", "74 Matches Total")
+                  ),
+                  div(
+                    style = "display: flex; gap: 12px; margin-top: 10px;",
+                    div(
+                      style = "flex: 1; background: rgba(0, 144, 223, 0.12); border: 1px solid rgba(0, 144, 223, 0.35); border-radius: 8px; padding: 10px; text-align: center;",
+                      div(style = "font-size: 1.6rem; font-weight: 900; color: #38BDF8;", "70"),
+                      div(style = "font-size: 0.78rem; font-weight: 700; color: #F8FAFC; text-transform: uppercase; margin-top: 2px;", "League Stage"),
+                      div(style = "font-size: 0.72rem; color: #94A3B8;", "10 Franchises")
+                    ),
+                    div(
+                      style = "flex: 1; background: rgba(255, 184, 0, 0.12); border: 1px solid rgba(255, 184, 0, 0.35); border-radius: 8px; padding: 10px; text-align: center;",
+                      div(style = "font-size: 1.6rem; font-weight: 900; color: #FFB800;", "4"),
+                      div(style = "font-size: 0.78rem; font-weight: 700; color: #F8FAFC; text-transform: uppercase; margin-top: 2px;", "Playoff Games"),
+                      div(style = "font-size: 0.72rem; color: #94A3B8;", "Q1, Elim, Q2, Final")
+                    )
+                  ),
+                  div(
+                    style = "margin-top: 10px; font-size: 0.75rem; color: #94A3B8; text-align: center; border-top: 1px dashed rgba(255, 255, 255, 0.1); padding-top: 8px;",
+                    "10 Franchises • 17,246 Deliveries • 26,493 Tournament Runs"
+                  )
+                )
+              )
+            ),
+            
             # KPI Cards Row
             div(
               class = "kpi-grid",
@@ -341,7 +647,7 @@ ui <- page_fluid(
                 class = "kpi-card kpi-primary",
                 div(class = "kpi-header", span(class = "kpi-title", "Total Matches"), div(class = "kpi-icon-wrap", "🏟️")),
                 div(class = "kpi-value", format(total_matches, big.mark = ",")),
-                div(class = "kpi-subtitle", "Complete 2025 tournament")
+                div(class = "kpi-subtitle", "70 League Stage + 4 Playoffs")
               ),
               div(
                 class = "kpi-card kpi-secondary",
@@ -465,28 +771,62 @@ ui <- page_fluid(
           # ====================================================================
           tabPanel(
             "player",
-            # Player Selection & Category Filter Bar
+            # Player Search & Category Filter Bar
             div(
               class = "filter-panel",
               div(
-                style = "flex: 1; min-width: 260px;",
-                tags$label("Select Player"),
-                selectizeInput(
-                  inputId = "player_select",
-                  label = NULL,
-                  choices = all_players,
-                  selected = "Sai Sudharsan",
-                  options = list(
-                    placeholder = "Type player name to search...",
-                    maxOptions = 250,
-                    openOnFocus = TRUE,
-                    selectOnTab = TRUE
+                style = "flex: 1; min-width: 320px;",
+                tags$label("Search Player (Instant Autocomplete)", style = "font-weight: 700; color: #CBD5E1; margin-bottom: 6px; display: block;"),
+                div(
+                  class = "player-search-bar-wrap",
+                  div(
+                    class = "search-input-group",
+                    span(class = "search-icon", "🔍"),
+                    tags$input(
+                      id = "player_search",
+                      type = "text",
+                      class = "player-search-control",
+                      placeholder = "Type any player name (e.g. Virat, Rohit, Bumrah, Klaasen, Stokes)...",
+                      value = "Sai Sudharsan",
+                      list = "ipl_players_datalist",
+                      autocomplete = "off",
+                      oninput = "Shiny.setInputValue('player_search', this.value);"
+                    ),
+                    tags$button(
+                      type = "button",
+                      class = "search-clear-btn",
+                      title = "Clear search",
+                      onclick = "document.getElementById('player_search').value = ''; Shiny.setInputValue('player_search', ''); document.getElementById('player_search').focus();",
+                      "✕"
+                    ),
+                    tags$datalist(
+                      id = "ipl_players_datalist",
+                      lapply(all_search_suggestions, function(p) tags$option(value = p))
+                    )
+                  ),
+                  # Quick Trending Star Chips
+                  div(
+                    class = "quick-chips-wrap",
+                    span(style = "font-size: 0.78rem; font-weight: 700; color: #94A3B8; margin-right: 4px; align-self: center;", "⚡ Popular:"),
+                    lapply(
+                      c("Sai Sudharsan", "Virat Kohli", "Suryakumar Yadav", "Jasprit Bumrah", "Travis Head", "Heinrich Klaasen", "Rashid Khan", "Rohit Sharma", "Prasidh"),
+                      function(star) {
+                        tags$button(
+                          type = "button",
+                          class = "quick-chip-btn",
+                          onclick = sprintf("document.getElementById('player_search').value = '%s'; Shiny.setInputValue('player_search', '%s');", star, star),
+                          star
+                        )
+                      }
+                    )
                   )
-                )
+                ),
+                # Hidden element for test backwards-compatibility
+                tags$div(style = "display: none;", selectizeInput("player_select", label = NULL, choices = all_players, selected = "Sai Sudharsan"))
               ),
               div(
                 style = "min-width: 240px;",
-                tags$label("Performance Category"),
+                tags$label("Performance Category", style = "font-weight: 700; color: #CBD5E1; margin-bottom: 6px; display: block;"),
                 radioGroupButtons(
                   inputId = "player_category",
                   label = NULL,
@@ -651,7 +991,7 @@ ui <- page_fluid(
           ),
           
           # ====================================================================
-          # PAGE 4: PLAYER COMPARISON STUDIO (Fast Autocomplete & Team Logos)
+          # PAGE 4: PLAYER COMPARISON STUDIO (Instant Search & Cricbuzz Profiles)
           # ====================================================================
           tabPanel(
             "comparison",
@@ -659,40 +999,76 @@ ui <- page_fluid(
             div(
               class = "filter-panel",
               div(
-                style = "flex: 1; min-width: 240px;",
-                tags$label("Player A (Type to Search)"),
-                selectizeInput(
-                  inputId = "comp_player_a",
-                  label = NULL,
-                  choices = all_players,
-                  selected = "Sai Sudharsan",
-                  options = list(
-                    placeholder = "Search Player A (e.g. Kohli, Rohit, Gill)...",
-                    maxOptions = 250,
-                    openOnFocus = TRUE,
-                    selectOnTab = TRUE
+                style = "flex: 1; min-width: 280px;",
+                tags$label("Player A (Type to Search)", style = "font-weight: 700; color: #38BDF8; margin-bottom: 6px; display: block;"),
+                div(
+                  class = "player-search-bar-wrap",
+                  div(
+                    class = "search-input-group",
+                    span(class = "search-icon", "🏏"),
+                    tags$input(
+                      id = "comp_player_a_search",
+                      type = "text",
+                      class = "player-search-control",
+                      placeholder = "Type Player A (e.g. Kohli, Rohit, Gill)...",
+                      value = "Sai Sudharsan",
+                      list = "ipl_comp_datalist_a",
+                      autocomplete = "off",
+                      oninput = "Shiny.setInputValue('comp_player_a_search', this.value);"
+                    ),
+                    tags$button(
+                      type = "button",
+                      class = "search-clear-btn",
+                      title = "Clear Player A",
+                      onclick = "document.getElementById('comp_player_a_search').value = ''; Shiny.setInputValue('comp_player_a_search', ''); document.getElementById('comp_player_a_search').focus();",
+                      "✕"
+                    ),
+                    tags$datalist(
+                      id = "ipl_comp_datalist_a",
+                      lapply(all_search_suggestions, function(p) tags$option(value = p))
+                    )
                   )
-                )
+                ),
+                # Hidden element for test backwards-compatibility
+                tags$div(style = "display: none;", selectizeInput("comp_player_a", label = NULL, choices = all_players, selected = "Sai Sudharsan"))
               ),
               div(
-                style = "flex: 1; min-width: 240px;",
-                tags$label("Player B (Type to Search)"),
-                selectizeInput(
-                  inputId = "comp_player_b",
-                  label = NULL,
-                  choices = all_players,
-                  selected = "Suryakumar Yadav",
-                  options = list(
-                    placeholder = "Search Player B (e.g. Bumrah, Noor, Head)...",
-                    maxOptions = 250,
-                    openOnFocus = TRUE,
-                    selectOnTab = TRUE
+                style = "flex: 1; min-width: 280px;",
+                tags$label("Player B (Type to Search)", style = "font-weight: 700; color: #FDE047; margin-bottom: 6px; display: block;"),
+                div(
+                  class = "player-search-bar-wrap",
+                  div(
+                    class = "search-input-group",
+                    span(class = "search-icon", "⚡"),
+                    tags$input(
+                      id = "comp_player_b_search",
+                      type = "text",
+                      class = "player-search-control",
+                      placeholder = "Type Player B (e.g. Bumrah, Noor, Head)...",
+                      value = "Suryakumar Yadav",
+                      list = "ipl_comp_datalist_b",
+                      autocomplete = "off",
+                      oninput = "Shiny.setInputValue('comp_player_b_search', this.value);"
+                    ),
+                    tags$button(
+                      type = "button",
+                      class = "search-clear-btn",
+                      title = "Clear Player B",
+                      onclick = "document.getElementById('comp_player_b_search').value = ''; Shiny.setInputValue('comp_player_b_search', ''); document.getElementById('comp_player_b_search').focus();",
+                      "✕"
+                    ),
+                    tags$datalist(
+                      id = "ipl_comp_datalist_b",
+                      lapply(all_search_suggestions, function(p) tags$option(value = p))
+                    )
                   )
-                )
+                ),
+                # Hidden element for test backwards-compatibility
+                tags$div(style = "display: none;", selectizeInput("comp_player_b", label = NULL, choices = all_players, selected = "Suryakumar Yadav"))
               ),
               div(
                 style = "min-width: 220px;",
-                tags$label("Comparison Mode"),
+                tags$label("Comparison Mode", style = "font-weight: 700; color: #CBD5E1; margin-bottom: 6px; display: block;"),
                 radioGroupButtons(
                   inputId = "comp_mode",
                   label = NULL,
@@ -726,10 +1102,48 @@ server <- function(input, output, session) {
     updateTabsetPanel(session, "main_tabs", selected = input$nav_menu)
   })
   
-  # Initialize Server-Side Selectize for Instant, Responsive Search
-  updateSelectizeInput(session, "comp_player_a", choices = all_players, selected = "Sai Sudharsan", server = TRUE)
-  updateSelectizeInput(session, "comp_player_b", choices = all_players, selected = "Suryakumar Yadav", server = TRUE)
-  updateSelectizeInput(session, "player_select", choices = all_players, selected = "Sai Sudharsan", server = TRUE)
+  # Reactive Player Resolver for Player Analytics (Supports instant typing & programmatic input)
+  get_active_player <- reactive({
+    query <- if (!is.null(input$player_search) && trimws(input$player_search) != "") {
+      input$player_search
+    } else if (!is.null(input$player_select) && trimws(input$player_select) != "") {
+      input$player_select
+    } else {
+      "Sai Sudharsan"
+    }
+    raw_q <- trimws(as.character(query))
+    resolved <- resolve_player(raw_q)
+    list(raw = raw_q, resolved = resolved)
+  })
+  
+  # Reactive Player Resolver for Comparison Studio
+  get_comp_players <- reactive({
+    qa <- if (!is.null(input$comp_player_a_search) && trimws(input$comp_player_a_search) != "") {
+      input$comp_player_a_search
+    } else if (!is.null(input$comp_player_a) && trimws(input$comp_player_a) != "") {
+      input$comp_player_a
+    } else {
+      "Sai Sudharsan"
+    }
+    
+    qb <- if (!is.null(input$comp_player_b_search) && trimws(input$comp_player_b_search) != "") {
+      input$comp_player_b_search
+    } else if (!is.null(input$comp_player_b) && trimws(input$comp_player_b) != "") {
+      input$comp_player_b
+    } else {
+      "Suryakumar Yadav"
+    }
+    
+    raw_a <- trimws(as.character(qa))
+    raw_b <- trimws(as.character(qb))
+    
+    list(
+      raw_a = raw_a,
+      resolved_a = resolve_player(raw_a),
+      raw_b = raw_b,
+      resolved_b = resolve_player(raw_b)
+    )
+  })
   
   # Dynamic Header Title and Subtitle based on active page
   output$header_title_ui <- renderUI({
@@ -739,17 +1153,25 @@ server <- function(input, output, session) {
         tags$h1("IPL 2025 Season Overview"),
         tags$p("Comprehensive tournament benchmarks, franchise standings and award contenders")
       ),
-      "player" = tagList(
-        tags$h1(paste("Player Analytics —", req(input$player_select))),
-        tags$p("Deep-dive ball-by-ball performance metrics, match contributions and breakdowns")
-      ),
+      "player" = {
+        act <- get_active_player()
+        p_name <- if (!is.null(act$resolved)) {
+          get_player_cricbuzz_meta(act$resolved)$full_name
+        } else {
+          act$raw
+        }
+        tagList(
+          tags$h1(paste("Player Analytics —", p_name)),
+          tags$p("Deep-dive ball-by-ball performance metrics, Cricbuzz profile and match breakdowns")
+        )
+      },
       "team" = tagList(
         tags$h1(paste("Franchise Intelligence —", req(input$team_select))),
         tags$p("Team scoring rates, bowling efficiency, and roster leaderboards")
       ),
       "comparison" = tagList(
         tags$h1("Player Comparison Studio"),
-        tags$p("Head-to-head performance radar, metric duels, and percentile intelligence")
+        tags$p("Head-to-head performance radar, metric duels, and Cricbuzz intelligence")
       )
     )
   })
@@ -913,28 +1335,97 @@ server <- function(input, output, session) {
   # ============================================================================
   
   output$player_analytics_ui <- renderUI({
-    req(input$player_select, input$player_category)
-    
-    selected_p <- input$player_select
+    req(input$player_category)
+    act <- get_active_player()
     cat_type <- input$player_category
+    
+    # Check if player was not part of IPL 2025
+    if (is.null(act$resolved)) {
+      return(
+        div(
+          class = "player-not-found-banner",
+          div(class = "not-found-icon-wrap", "⚠️"),
+          div(
+            tags$h3(style = "color: #EF4444; margin: 0 0 6px 0; font-size: 1.25rem; font-weight: 800;", "Player Not Available in IPL 2025"),
+            tags$p(
+              style = "color: #CBD5E1; margin: 0 0 10px 0; font-size: 0.95rem; line-height: 1.5;",
+              tags$strong(paste0("'", act$raw, "'")), " was not available or did not play in the IPL 2025 season."
+            ),
+            div(
+              class = "not-found-badge",
+              "❌ No delivery records found for this player in the official 2025 tournament dataset."
+            ),
+            div(
+              style = "margin-top: 14px; color: #94A3B8; font-size: 0.84rem;",
+              "💡 Tip: Try searching for active 2025 stars like ",
+              tags$span(style = "color: #38BDF8; font-weight: 600;", "Virat Kohli, Sai Sudharsan, Suryakumar Yadav, Jasprit Bumrah, Travis Head, Heinrich Klaasen, Nicholas Pooran, or Prasidh.")
+            )
+          )
+        )
+      )
+    }
+    
+    selected_p <- act$resolved
+    meta <- get_player_cricbuzz_meta(selected_p)
+    p_team_code <- tolower(trimws(strsplit(meta$franchise, ",")[[1]][1]))
+    p_team_logo <- get_team_logo_path(p_team_code)
+    
+    # Cricbuzz Player Profile Card
+    cricbuzz_card <- div(
+      class = "cricbuzz-profile-card",
+      div(
+        class = "cricbuzz-header",
+        if (!is.null(p_team_logo)) tags$img(src = p_team_logo, class = "cricbuzz-team-logo", alt = meta$franchise) else NULL,
+        div(
+          class = "cricbuzz-title-group",
+          div(class = "cricbuzz-player-name", meta$full_name),
+          div(class = "cricbuzz-franchise-sub", paste0("IPL 2025 Franchise: ", meta$franchise))
+        )
+      ),
+      div(
+        class = "cricbuzz-specs-grid",
+        div(
+          class = "cricbuzz-spec-item",
+          div(class = "spec-label", "Role"),
+          div(class = "spec-val role", meta$role)
+        ),
+        div(
+          class = "cricbuzz-spec-item",
+          div(class = "spec-label", "Batting Style"),
+          div(class = "spec-val", meta$bat_style)
+        ),
+        div(
+          class = "cricbuzz-spec-item",
+          div(class = "spec-label", "Bowling Style"),
+          div(class = "spec-val", meta$bowl_style)
+        ),
+        div(
+          class = "cricbuzz-spec-item",
+          div(class = "spec-label", "IPL 2025 Squad"),
+          div(class = "spec-val", meta$franchise)
+        )
+      )
+    )
     
     if (cat_type == "batting") {
       p_bat <- batting_summary %>% filter(striker == selected_p)
       
       if (nrow(p_bat) == 0 || p_bat$balls == 0) {
         return(
-          div(
-            class = "empty-state",
-            div(class = "empty-state-icon", "🏏"),
-            tags$h3(paste("No Batting Records for", selected_p)),
-            tags$p("This player has not faced any legal deliveries in the 2025 season. Switch to Bowling Analysis above if they are a specialist bowler.")
+          tagList(
+            cricbuzz_card,
+            div(
+              class = "empty-state",
+              div(class = "empty-state-icon", "🏏"),
+              tags$h3(paste("No Batting Records for", meta$full_name)),
+              tags$p("This player has not faced any legal deliveries in the 2025 season. Switch to Bowling Analysis above if they are a specialist bowler.")
+            )
           )
         )
       }
       
-      p_team_code <- tolower(trimws(strsplit(p_bat$teams, ",")[[1]][1]))
-      
       tagList(
+        cricbuzz_card,
         # 8 Batting KPI Cards
         div(
           class = "kpi-grid",
@@ -944,7 +1435,7 @@ server <- function(input, output, session) {
             div(class = "kpi-value", format(p_bat$runs, big.mark = ",")),
             div(
               class = "kpi-subtitle",
-              if (!is.null(get_team_logo_path(p_team_code))) tags$img(src = get_team_logo_path(p_team_code), class = "team-logo-icon", style = "width: 18px; height: 18px; vertical-align: middle; margin-right: 6px;"),
+              if (!is.null(p_team_logo)) tags$img(src = p_team_logo, class = "team-logo-icon", style = "width: 18px; height: 18px; vertical-align: middle; margin-right: 6px;"),
               paste("Franchise:", p_bat$teams)
             )
           ),
@@ -1088,18 +1579,20 @@ server <- function(input, output, session) {
       
       if (nrow(p_bowl) == 0 || p_bowl$legal_balls == 0) {
         return(
-          div(
-            class = "empty-state",
-            div(class = "empty-state-icon", "🎯"),
-            tags$h3(paste("No Bowling Records for", selected_p)),
-            tags$p("This player has not bowled any legal deliveries in the 2025 season. Switch to Batting Analysis above if they are a specialist batter.")
+          tagList(
+            cricbuzz_card,
+            div(
+              class = "empty-state",
+              div(class = "empty-state-icon", "🎯"),
+              tags$h3(paste("No Bowling Records for", meta$full_name)),
+              tags$p("This player has not bowled any legal deliveries in the 2025 season. Switch to Batting Analysis above if they are a specialist batter.")
+            )
           )
         )
       }
       
-      p_team_code <- tolower(trimws(strsplit(p_bowl$teams, ",")[[1]][1]))
-      
       tagList(
+        cricbuzz_card,
         # 7 Bowling KPI Cards
         div(
           class = "kpi-grid",
@@ -1246,9 +1739,10 @@ server <- function(input, output, session) {
   
   # Player Batting Charts (Luminous & Eye-Catching Lighter Elements)
   output$plot_player_bat_match_trend <- renderPlotly({
-    req(input$player_select)
+    req(get_active_player()$resolved)
+    selected_p <- get_active_player()$resolved
     p_data <- ipl %>%
-      filter(striker == input$player_select) %>%
+      filter(striker == selected_p) %>%
       group_by(match_id, match_no, date, bowling_team) %>%
       summarise(
         runs = sum(runs_of_bat, na.rm = TRUE),
@@ -1285,8 +1779,9 @@ server <- function(input, output, session) {
   })
   
   output$plot_player_bat_runs_donut <- renderPlotly({
-    req(input$player_select)
-    p_data <- ipl %>% filter(striker == input$player_select)
+    req(get_active_player()$resolved)
+    selected_p <- get_active_player()$resolved
+    p_data <- ipl %>% filter(striker == selected_p)
     
     fours_runs <- sum(p_data$runs_of_bat == 4, na.rm = TRUE) * 4
     sixes_runs <- sum(p_data$runs_of_bat == 6, na.rm = TRUE) * 6
@@ -1327,9 +1822,10 @@ server <- function(input, output, session) {
   })
   
   output$plot_player_bat_innings <- renderPlotly({
-    req(input$player_select)
+    req(get_active_player()$resolved)
+    selected_p <- get_active_player()$resolved
     inn_data <- ipl %>%
-      filter(striker == input$player_select, innings %in% c(1, 2)) %>%
+      filter(striker == selected_p, innings %in% c(1, 2)) %>%
       group_by(innings) %>%
       summarise(
         runs = sum(runs_of_bat, na.rm = TRUE),
@@ -1359,9 +1855,10 @@ server <- function(input, output, session) {
   })
   
   output$plot_player_bat_phase <- renderPlotly({
-    req(input$player_select)
+    req(get_active_player()$resolved)
+    selected_p <- get_active_player()$resolved
     phase_data <- ipl %>%
-      filter(striker == input$player_select) %>%
+      filter(striker == selected_p) %>%
       group_by(over_phase) %>%
       summarise(
         runs = sum(runs_of_bat, na.rm = TRUE),
@@ -1390,9 +1887,10 @@ server <- function(input, output, session) {
   })
   
   output$table_player_bat_log <- renderDT({
-    req(input$player_select)
+    req(get_active_player()$resolved)
+    selected_p <- get_active_player()$resolved
     match_log <- ipl %>%
-      filter(striker == input$player_select) %>%
+      filter(striker == selected_p) %>%
       group_by(match_id, match_no, date, venue, batting_team, bowling_team) %>%
       summarise(
         Runs = sum(runs_of_bat, na.rm = TRUE),
@@ -1434,9 +1932,10 @@ server <- function(input, output, session) {
   
   # Player Bowling Charts (Luminous & Eye-Catching Lighter Elements)
   output$plot_player_bowl_match_trend <- renderPlotly({
-    req(input$player_select)
+    req(get_active_player()$resolved)
+    selected_p <- get_active_player()$resolved
     b_data <- ipl %>%
-      filter(bowler == input$player_select) %>%
+      filter(bowler == selected_p) %>%
       group_by(match_id, match_no, date, batting_team) %>%
       summarise(
         wickets = sum(is_bowler_wicket, na.rm = TRUE),
@@ -1474,9 +1973,10 @@ server <- function(input, output, session) {
   })
   
   output$plot_player_bowl_economy <- renderPlotly({
-    req(input$player_select)
+    req(get_active_player()$resolved)
+    selected_p <- get_active_player()$resolved
     econ_data <- ipl %>%
-      filter(bowler == input$player_select) %>%
+      filter(bowler == selected_p) %>%
       group_by(match_id, match_no, batting_team) %>%
       summarise(
         runs = sum(bowler_runs, na.rm = TRUE),
@@ -1514,9 +2014,10 @@ server <- function(input, output, session) {
   })
   
   output$plot_player_bowl_innings <- renderPlotly({
-    req(input$player_select)
+    req(get_active_player()$resolved)
+    selected_p <- get_active_player()$resolved
     inn_data <- ipl %>%
-      filter(bowler == input$player_select, innings %in% c(1, 2)) %>%
+      filter(bowler == selected_p, innings %in% c(1, 2)) %>%
       group_by(innings) %>%
       summarise(
         wickets = sum(is_bowler_wicket, na.rm = TRUE),
@@ -1546,9 +2047,10 @@ server <- function(input, output, session) {
   })
   
   output$plot_player_bowl_phase <- renderPlotly({
-    req(input$player_select)
+    req(get_active_player()$resolved)
+    selected_p <- get_active_player()$resolved
     phase_data <- ipl %>%
-      filter(bowler == input$player_select) %>%
+      filter(bowler == selected_p) %>%
       group_by(over_phase) %>%
       summarise(
         wickets = sum(is_bowler_wicket, na.rm = TRUE),
@@ -1578,9 +2080,10 @@ server <- function(input, output, session) {
   })
   
   output$table_player_bowl_log <- renderDT({
-    req(input$player_select)
+    req(get_active_player()$resolved)
+    selected_p <- get_active_player()$resolved
     bowl_log <- ipl %>%
-      filter(bowler == input$player_select) %>%
+      filter(bowler == selected_p) %>%
       group_by(match_id, match_no, date, venue, bowling_team, batting_team) %>%
       summarise(
         legal_balls = sum(is_legal, na.rm = TRUE),
@@ -1891,21 +2394,77 @@ server <- function(input, output, session) {
   # ============================================================================
   
   output$comp_validation_ui <- renderUI({
-    req(input$comp_player_a, input$comp_player_b)
-    if (input$comp_player_a == input$comp_player_b) {
-      div(
-        class = "alert alert-warning",
-        style = "background: rgba(255, 184, 0, 0.15); border: 1px solid #FFB800; color: #FFB800; border-radius: 8px; padding: 12px 18px; margin-bottom: 20px;",
-        tags$b("Notice: "), "You have selected the same player for both Player A and Player B. Please select two different players to view a head-to-head comparison."
+    comp <- get_comp_players()
+    
+    # Check if Player A is not in IPL 2025
+    if (is.null(comp$resolved_a)) {
+      return(
+        div(
+          class = "player-not-found-banner",
+          style = "margin-bottom: 20px;",
+          div(class = "not-found-icon-wrap", "⚠️"),
+          div(
+            tags$h4(style = "color: #EF4444; margin: 0 0 4px 0; font-weight: 700;", "Player A Not Available in IPL 2025"),
+            tags$p(
+              style = "color: #CBD5E1; margin: 0; font-size: 0.9rem;",
+              tags$strong(paste0("'", comp$raw_a, "'")), " was not available or did not play in the IPL 2025 season. Please enter or select an active 2025 player."
+            )
+          )
+        )
       )
     }
+    
+    # Check if Player B is not in IPL 2025
+    if (is.null(comp$resolved_b)) {
+      return(
+        div(
+          class = "player-not-found-banner",
+          style = "margin-bottom: 20px;",
+          div(class = "not-found-icon-wrap", "⚠️"),
+          div(
+            tags$h4(style = "color: #EF4444; margin: 0 0 4px 0; font-weight: 700;", "Player B Not Available in IPL 2025"),
+            tags$p(
+              style = "color: #CBD5E1; margin: 0; font-size: 0.9rem;",
+              tags$strong(paste0("'", comp$raw_b, "'")), " was not available or did not play in the IPL 2025 season. Please enter or select an active 2025 player."
+            )
+          )
+        )
+      )
+    }
+    
+    # Check if identical player selected
+    if (comp$resolved_a == comp$resolved_b) {
+      return(
+        div(
+          class = "alert alert-warning",
+          style = "background: rgba(255, 184, 0, 0.15); border: 1px solid #FFB800; color: #FFB800; border-radius: 8px; padding: 12px 18px; margin-bottom: 20px;",
+          tags$b("Notice: "), "You have selected the same player for both Player A and Player B. Please select two different players to view a head-to-head comparison."
+        )
+      )
+    }
+    
+    NULL
   })
   
   output$comp_content_ui <- renderUI({
-    req(input$comp_player_a, input$comp_player_b, input$comp_mode)
+    req(input$comp_mode)
+    comp <- get_comp_players()
     
-    p_a <- input$comp_player_a
-    p_b <- input$comp_player_b
+    if (is.null(comp$resolved_a) || is.null(comp$resolved_b)) {
+      return(
+        div(
+          class = "empty-state",
+          div(class = "empty-state-icon", "⚔️"),
+          tags$h3("Comparison Studio Awaiting Valid 2025 Players"),
+          tags$p("Select or search for two active IPL 2025 players above to view radar models and head-to-head metrics.")
+        )
+      )
+    }
+    
+    p_a <- comp$resolved_a
+    p_b <- comp$resolved_b
+    meta_a <- get_player_cricbuzz_meta(p_a)
+    meta_b <- get_player_cricbuzz_meta(p_b)
     mode <- input$comp_mode
     
     if (mode == "batting") {
@@ -1941,16 +2500,21 @@ server <- function(input, output, session) {
       tagList(
         div(
           class = "comparison-grid",
-          # Player A Card with Franchise Crest
+          # Player A Card with Franchise Crest & Cricbuzz Meta
           div(
             class = paste("player-card", ifelse(wins_a > wins_b, "winner", "")),
             if (wins_a > wins_b) span(class = "leader-pill", "🏆 DUEL LEADER"),
             div(
               class = "player-card-header-row",
-              if (!is.null(get_team_logo_path(team_a))) tags$img(src = get_team_logo_path(team_a), class = "player-card-team-logo", alt = team_a) else NULL,
+              if (!is.null(get_team_logo_path(first_team_a))) tags$img(src = get_team_logo_path(first_team_a), class = "player-card-team-logo", alt = team_a) else NULL,
               div(
-                tags$h3(style = "color: #38BDF8; margin: 0;", p_a),
-                tags$p(style = "color: #94A3B8; font-size: 0.85rem; margin: 2px 0 0 0;", paste("Franchise:", team_a))
+                tags$h3(style = "color: #38BDF8; margin: 0;", meta_a$full_name),
+                tags$p(style = "color: #94A3B8; font-size: 0.85rem; margin: 2px 0 0 0;", paste("Franchise:", team_a)),
+                div(
+                  style = "display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px;",
+                  span(style = "background: rgba(0, 144, 223, 0.2); border: 1px solid rgba(0, 144, 223, 0.4); color: #38BDF8; font-size: 0.72rem; padding: 2px 8px; border-radius: 4px; font-weight: 600;", meta_a$role),
+                  span(style = "background: rgba(255, 255, 255, 0.08); color: #CBD5E1; font-size: 0.72rem; padding: 2px 8px; border-radius: 4px;", meta_a$bat_style)
+                )
               )
             ),
             div(class = "metric-row", span(class = "metric-label", "Total Runs"), span(class = paste("metric-val", ifelse(runs_a >= runs_b, "lead", "")), runs_a)),
@@ -1963,16 +2527,21 @@ server <- function(input, output, session) {
           # Central VS Badge
           div(class = "vs-badge-container", div(class = "vs-badge", "VS")),
           
-          # Player B Card with Franchise Crest
+          # Player B Card with Franchise Crest & Cricbuzz Meta
           div(
             class = paste("player-card", ifelse(wins_b > wins_a, "winner", "")),
             if (wins_b > wins_a) span(class = "leader-pill", "🏆 DUEL LEADER"),
             div(
               class = "player-card-header-row",
-              if (!is.null(get_team_logo_path(team_b))) tags$img(src = get_team_logo_path(team_b), class = "player-card-team-logo", alt = team_b) else NULL,
+              if (!is.null(get_team_logo_path(first_team_b))) tags$img(src = get_team_logo_path(first_team_b), class = "player-card-team-logo", alt = team_b) else NULL,
               div(
-                tags$h3(style = "color: #FDE047; margin: 0;", p_b),
-                tags$p(style = "color: #94A3B8; font-size: 0.85rem; margin: 2px 0 0 0;", paste("Franchise:", team_b))
+                tags$h3(style = "color: #FDE047; margin: 0;", meta_b$full_name),
+                tags$p(style = "color: #94A3B8; font-size: 0.85rem; margin: 2px 0 0 0;", paste("Franchise:", team_b)),
+                div(
+                  style = "display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px;",
+                  span(style = "background: rgba(253, 224, 71, 0.2); border: 1px solid rgba(253, 224, 71, 0.4); color: #FDE047; font-size: 0.72rem; padding: 2px 8px; border-radius: 4px; font-weight: 600;", meta_b$role),
+                  span(style = "background: rgba(255, 255, 255, 0.08); color: #CBD5E1; font-size: 0.72rem; padding: 2px 8px; border-radius: 4px;", meta_b$bat_style)
+                )
               )
             ),
             div(class = "metric-row", span(class = "metric-label", "Total Runs"), span(class = paste("metric-val", ifelse(runs_b >= runs_a, "lead", "")), runs_b)),
@@ -2074,10 +2643,15 @@ server <- function(input, output, session) {
             if (w_a > w_b) span(class = "leader-pill", "🏆 DUEL LEADER"),
             div(
               class = "player-card-header-row",
-              if (!is.null(get_team_logo_path(team_a))) tags$img(src = get_team_logo_path(team_a), class = "player-card-team-logo", alt = team_a) else NULL,
+              if (!is.null(get_team_logo_path(first_team_a))) tags$img(src = get_team_logo_path(first_team_a), class = "player-card-team-logo", alt = team_a) else NULL,
               div(
-                tags$h3(style = "color: #38BDF8; margin: 0;", p_a),
-                tags$p(style = "color: #94A3B8; font-size: 0.85rem; margin: 2px 0 0 0;", paste("Franchise:", team_a))
+                tags$h3(style = "color: #38BDF8; margin: 0;", meta_a$full_name),
+                tags$p(style = "color: #94A3B8; font-size: 0.85rem; margin: 2px 0 0 0;", paste("Franchise:", team_a)),
+                div(
+                  style = "display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px;",
+                  span(style = "background: rgba(0, 144, 223, 0.2); border: 1px solid rgba(0, 144, 223, 0.4); color: #38BDF8; font-size: 0.72rem; padding: 2px 8px; border-radius: 4px; font-weight: 600;", meta_a$role),
+                  span(style = "background: rgba(255, 255, 255, 0.08); color: #CBD5E1; font-size: 0.72rem; padding: 2px 8px; border-radius: 4px;", meta_a$bowl_style)
+                )
               )
             ),
             div(class = "metric-row", span(class = "metric-label", "Credited Wickets"), span(class = paste("metric-val", ifelse(wkts_a >= wkts_b, "lead", "")), wkts_a)),
@@ -2096,10 +2670,15 @@ server <- function(input, output, session) {
             if (w_b > w_a) span(class = "leader-pill", "🏆 DUEL LEADER"),
             div(
               class = "player-card-header-row",
-              if (!is.null(get_team_logo_path(team_b))) tags$img(src = get_team_logo_path(team_b), class = "player-card-team-logo", alt = team_b) else NULL,
+              if (!is.null(get_team_logo_path(first_team_b))) tags$img(src = get_team_logo_path(first_team_b), class = "player-card-team-logo", alt = team_b) else NULL,
               div(
-                tags$h3(style = "color: #FDE047; margin: 0;", p_b),
-                tags$p(style = "color: #94A3B8; font-size: 0.85rem; margin: 2px 0 0 0;", paste("Franchise:", team_b))
+                tags$h3(style = "color: #FDE047; margin: 0;", meta_b$full_name),
+                tags$p(style = "color: #94A3B8; font-size: 0.85rem; margin: 2px 0 0 0;", paste("Franchise:", team_b)),
+                div(
+                  style = "display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px;",
+                  span(style = "background: rgba(253, 224, 71, 0.2); border: 1px solid rgba(253, 224, 71, 0.4); color: #FDE047; font-size: 0.72rem; padding: 2px 8px; border-radius: 4px; font-weight: 600;", meta_b$role),
+                  span(style = "background: rgba(255, 255, 255, 0.08); color: #CBD5E1; font-size: 0.72rem; padding: 2px 8px; border-radius: 4px;", meta_b$bowl_style)
+                )
               )
             ),
             div(class = "metric-row", span(class = "metric-label", "Credited Wickets"), span(class = paste("metric-val", ifelse(wkts_b >= wkts_a, "lead", "")), wkts_b)),
@@ -2154,9 +2733,11 @@ server <- function(input, output, session) {
   
   # Radar Chart Rendering (Light, Spacious, Attractive Polar Layout)
   output$plot_comp_radar <- renderPlotly({
-    req(input$comp_player_a, input$comp_player_b, input$comp_mode)
-    p_a <- input$comp_player_a
-    p_b <- input$comp_player_b
+    req(input$comp_mode)
+    comp <- get_comp_players()
+    req(comp$resolved_a, comp$resolved_b)
+    p_a <- comp$resolved_a
+    p_b <- comp$resolved_b
     mode <- input$comp_mode
     
     if (mode == "batting") {
@@ -2308,9 +2889,11 @@ server <- function(input, output, session) {
   
   # Comparison Scorecard Table
   output$table_comp_scorecard <- renderDT({
-    req(input$comp_player_a, input$comp_player_b, input$comp_mode)
-    p_a <- input$comp_player_a
-    p_b <- input$comp_player_b
+    req(input$comp_mode)
+    comp <- get_comp_players()
+    req(comp$resolved_a, comp$resolved_b)
+    p_a <- comp$resolved_a
+    p_b <- comp$resolved_b
     mode <- input$comp_mode
     
     if (mode == "batting") {

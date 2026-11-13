@@ -16,39 +16,57 @@ The platform features a modern dark-themed interface, statistically rigorous cri
 
 ## 📌 Key Platform Features
 
-### 1. 📊 IPL 2025 Season Overview
+### 1. 📊 IPL 2025 Season Overview & Tournament Honors
+- **Tournament Honors & Stages Banner:**
+  - 🏆 **Champions:** Royal Challengers Bengaluru (**RCB**) — Clinched their maiden IPL trophy scoring 190/9 and defending by 6 runs in the Grand Final at Ahmedabad.
+  - 🥈 **Runners-Up:** Punjab Kings (**PBKS**) — Table toppers with 3,258 tournament runs; scored 184/7 in the Final.
+  - 📅 **Tournament Structure:** Displays **70 League Stage matches** (double round-robin) and **4 Playoff fixtures** (Qualifier 1, Eliminator, Qualifier 2, Grand Final).
 - **Dynamic KPI Cards:** Instant summary of total matches (74), legal deliveries (17,246), cumulative runs scored (26,493), and total dismissals (871 fallen, 830 credited to bowlers).
 - **Runs Distribution by Phase & Innings:** Over-phase breakdown comparing run generation across Powerplay (Overs 1–6), Middle (Overs 7–15), and Death overs (Overs 16–20) for 1st vs 2nd innings.
-- **Franchise Total Runs Comparison:** Horizontal bar rankings of cumulative scoring output across all 10 franchises.
-- **Orange Cap Contenders (Top 5 Batsmen):** Real-time leaderboard detailing runs, strike rate, batting average, fours, and sixes.
-- **Purple Cap Contenders (Top 5 Bowlers):** Real-time leaderboard detailing wickets, legal overs bowled, economy rate, and dot-ball percentage.
-- **Franchise Standings:** Season table with matches, runs scored, balls faced, scoring run rate, and wickets taken.
+- **Franchise Total Runs Comparison:** Horizontal bar rankings of cumulative scoring output across all 10 franchises with team colors.
+- **Orange Cap Contenders (Top 5 Batsmen):** Real-time leaderboard detailing runs, strike rate, batting average, fours, and sixes with official franchise crests.
+- **Purple Cap Contenders (Top 5 Bowlers):** Real-time leaderboard detailing wickets, legal overs bowled, economy rate, and dot-ball percentage with franchise crests.
+- **Franchise Standings:** Season table with matches, runs scored, balls faced, scoring run rate, and wickets taken. Protected by overflow boundaries.
 
-### 2. 👤 Unified Player Analytics
-- **Searchable Player Selection:** Access all 168 batters and 129 bowlers through instant autocomplete.
+### 2. 👤 Unified Player Analytics & Cricbuzz Intelligence
+- **Instant Autocomplete Search Bar:** Native letter-by-letter live autocomplete suggestions for every alphabet entry typed (`a`, `b`, `c`, etc.), powered by a comprehensive catalog of 300+ player aliases and full names.
+- **⚡ Quick Trending Star Chips:** One-click instant profile switching for popular IPL 2025 stars (Sai Sudharsan, Virat Kohli, Suryakumar Yadav, Jasprit Bumrah, Travis Head, Heinrich Klaasen, Rashid Khan, Rohit Sharma, Prasidh).
+- **🏏 Cricbuzz Profile Header Cards:**
+  - **Player Role:** e.g. `Top order Batter`, `Wicketkeeper Batter`, `Batting Allrounder`, `Bowling Allrounder`, `Fast Bowler`, `Spin Bowler`.
+  - **Batting Style:** e.g. `Right hand Bat`, `Left hand Bat`.
+  - **Bowling Style:** e.g. `Right arm Fast`, `Right arm Fast Medium`, `Slow Left arm Orthodox`, `Right arm Legbreak`.
+  - **Franchise & Squad Crest:** Authentic team badge with active franchise association.
+- **⚠️ Non-IPL 2025 Player Guard & Diagnostic Banner:**
+  - Entering players who were not part of IPL 2025 (e.g. *Ben Stokes*, *Steve Smith*, *Babar Azam*, *Joe Root*) displays a prominent diagnostic message:
+    > *"'{Player}' was not available or did not play in the IPL 2025 season."*
+  - Provides instant tips and one-click access to active 2025 stars.
 - **Batting Analysis Module:**
   - 8 core performance indicators: Total Runs, Balls Faced, Batting Average (with not-out handling), Strike Rate, Fours, Sixes, Boundary Run %, and Matches Played.
   - Match-by-match scoring progression with balls faced.
   - Run composition breakdown donut chart (4s, 6s, and running between the wickets).
   - Target setting vs. chasing innings splits.
   - Phase-by-phase scoring analysis (Powerplay, Middle, Death).
-  - Searchable match-by-match innings log table.
+  - Searchable match-by-match innings log table with opponent team crests.
 - **Bowling Analysis Module:**
   - 7 core bowling indicators: Credited Wickets, Runs Conceded, Legal Overs Bowled, Economy Rate, Bowling Average, Bowling Strike Rate, and Dot-Ball %.
   - Match-by-match spell trend tracking wickets and runs conceded.
   - Economy rate progression mapped against the tournament baseline (8.5 RPO).
   - Target defending vs containing innings splits.
-  - Searchable spell scorecard log.
+  - Searchable spell scorecard log with opponent team crests.
 
 ### 3. 🛡️ Franchise & Team Analytics
 - **Franchise Selection & Season Filtering:** Inspect detailed franchise metrics for any of the 10 teams.
-- **Team KPI Cards:** Runs scored, wickets taken, matches played, and net scoring run rate.
+- **Team KPI Cards:** Runs scored, wickets taken, matches played, and net scoring run rate with team banner crest.
 - **Match-by-Match Scoring Trend:** Per-match team totals compared with team season average.
 - **Innings Splits:** Runs and wickets comparative breakdown between setting and chasing targets.
 - **Phase Distribution:** Batting scoring rates and bowling breakthroughs across Powerplay, Middle, and Death overs.
-- **Franchise Top 3 Batsmen & Bowlers:** Top performers within the selected squad.
+- **Franchise Top 3 Batsmen & Bowlers:** Top performers within the selected squad with individual crests.
 
 ### 4. ⚔️ Player Comparison Studio (Head-to-Head Duel)
+- **Instant Search for Both Players:** Dedicated autocomplete search bars for Player A and Player B with letter-by-letter suggestions.
+- **Cricbuzz Specs on Comparison Cards:** Player roles, batting styles, and bowling styles displayed directly on the head-to-head cards.
+- **Non-IPL Player Validation Alert:** Clear alert banner if either Player A or Player B did not play in the 2025 season.
+- **Identical Selection Notice:** Advisory banner when the same player is selected for both sides.
 - **Interactive Matchup:** Compare any two players side-by-side in either **Batting Duel** or **Bowling Duel** mode.
 - **Dynamic Leader Highlighting:** Automatic detection of metric leaders with visual leader badges.
 - **Normalized Multi-Axis Radar Model:** 
@@ -56,7 +74,6 @@ The platform features a modern dark-themed interface, statistically rigorous cri
   - Properly inverts defensive bowling statistics (Economy Rate, Bowling Average, and Bowling Strike Rate) so lower, superior figures yield higher normalized scores.
   - Interactive tooltips display both normalized scores and actual raw statistics simultaneously.
 - **Comprehensive Scorecard Table:** Granular head-to-head comparison with directional leader indicators.
-- **Safe Edge-Case Handling:** Clean fallbacks and warnings for identical player selections or players with insufficient records.
 
 ---
 
@@ -154,7 +171,12 @@ IPL_2025_Performance_Analysis/
     ├── ipl_logo.png                        # Official IPL batsman icon
     ├── logo.png                            # Application logo asset
     ├── logo.svg                            # Vector badge fallback
-    └── styles.css                          # Official IPL dark theme stylesheet
+    ├── styles.css                          # Official IPL dark theme stylesheet
+    └── teams/                              # Official franchise crests (CSK, MI, RCB, etc.)
+        ├── csk.png
+        ├── pbks.png
+        ├── rcb.png
+        └── ...
 ```
 
 ---
