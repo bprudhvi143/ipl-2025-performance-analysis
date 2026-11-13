@@ -16,11 +16,12 @@ The platform features a modern dark-themed interface, statistically rigorous cri
 
 ## 📌 Key Platform Features
 
-### 1. 📊 IPL 2025 Season Overview & Tournament Honors
-- **Tournament Honors & Stages Banner:**
-  - 🏆 **Champions:** Royal Challengers Bengaluru (**RCB**) — Clinched their maiden IPL trophy scoring 190/9 and defending by 6 runs in the Grand Final at Ahmedabad.
-  - 🥈 **Runners-Up:** Punjab Kings (**PBKS**) — Table toppers with 3,258 tournament runs; scored 184/7 in the Final.
-  - 📅 **Tournament Structure:** Displays **70 League Stage matches** (double round-robin) and **4 Playoff fixtures** (Qualifier 1, Eliminator, Qualifier 2, Grand Final).
+### 1. 📊 IPL 2025 Season Overview & Tournament Special Mention
+- **Special Mention Ribbon for Champions & Runners-Up:**
+  - 🏆 **Champions:** Royal Challengers Bengaluru (**RCB**) (190/9) — Defeated PBKS by 6 runs in the Grand Final at Ahmedabad.
+  - 🥈 **Runners-Up:** Punjab Kings (**PBKS**) (184/7) — Season table-toppers with 3,258 runs.
+  - 🏟️ **Tournament Structure:** 74 Matches Total (70 League Stage + 4 Playoffs).
+  - Designed as a sleek, non-intrusive horizontal mention bar directly above the season KPI cards.
 - **Dynamic KPI Cards:** Instant summary of total matches (74), legal deliveries (17,246), cumulative runs scored (26,493), and total dismissals (871 fallen, 830 credited to bowlers).
 - **Runs Distribution by Phase & Innings:** Over-phase breakdown comparing run generation across Powerplay (Overs 1–6), Middle (Overs 7–15), and Death overs (Overs 16–20) for 1st vs 2nd innings.
 - **Franchise Total Runs Comparison:** Horizontal bar rankings of cumulative scoring output across all 10 franchises with team colors.

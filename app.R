@@ -556,87 +556,31 @@ ui <- page_fluid(
           # ====================================================================
           tabPanel(
             "overview",
-            # Tournament Summary & Honors Banner (Champions, Runners-Up & Stages)
+            # Special Mention Ribbon for Champions & Runners-Up
             div(
-              class = "tournament-summary-banner",
+              class = "special-mention-ribbon",
               div(
-                class = "tournament-honor-grid",
-                # Champion Card: RCB
-                div(
-                  class = "honor-card champion-card",
-                  div(
-                    class = "honor-header",
-                    div(class = "honor-badge", "🏆 TOURNAMENT CHAMPIONS"),
-                    span(style = "color: #FFB800; font-size: 0.8rem; font-weight: 700;", "Final Winner (by 6 runs)")
-                  ),
-                  div(
-                    class = "honor-team",
-                    tags$img(src = "teams/rcb.png", class = "honor-logo", alt = "RCB"),
-                    div(
-                      div(style = "font-size: 1.25rem; font-weight: 800; color: #FFFFFF;", "Royal Challengers Bengaluru"),
-                      div(style = "font-size: 0.82rem; color: #94A3B8;", "RCB • 1st IPL Title")
-                    )
-                  ),
-                  div(
-                    class = "honor-score",
-                    "Final: 190/9",
-                    span(style = "font-size: 0.85rem; font-weight: 500; color: #CBD5E1; margin-left: 8px;", "(20.0 Overs)")
-                  ),
-                  div(class = "honor-note", "Defeated PBKS by 6 runs in Grand Final at Ahmedabad")
-                ),
-                
-                # Runners-Up Card: PBKS
-                div(
-                  class = "honor-card runner-card",
-                  div(
-                    class = "honor-header",
-                    div(class = "honor-badge", "🥈 TOURNAMENT RUNNERS-UP"),
-                    span(style = "color: #CBD5E1; font-size: 0.8rem; font-weight: 700;", "Grand Finalist")
-                  ),
-                  div(
-                    class = "honor-team",
-                    tags$img(src = "teams/pbks.png", class = "honor-logo", alt = "PBKS"),
-                    div(
-                      div(style = "font-size: 1.25rem; font-weight: 800; color: #FFFFFF;", "Punjab Kings"),
-                      div(style = "font-size: 0.82rem; color: #94A3B8;", "PBKS • Table Toppers (3,258 runs)")
-                    )
-                  ),
-                  div(
-                    class = "honor-score",
-                    "Final: 184/7",
-                    span(style = "font-size: 0.85rem; font-weight: 500; color: #CBD5E1; margin-left: 8px;", "(20.0 Overs)")
-                  ),
-                  div(class = "honor-note", "Chased 191 in Final • Season Runner-Up")
-                ),
-                
-                # Tournament Stages Card: League Stage & Playoffs
-                div(
-                  class = "honor-card stage-card",
-                  div(
-                    class = "honor-header",
-                    div(class = "honor-badge", "📅 TOURNAMENT STRUCTURE"),
-                    span(style = "color: #38BDF8; font-size: 0.8rem; font-weight: 700;", "74 Matches Total")
-                  ),
-                  div(
-                    style = "display: flex; gap: 12px; margin-top: 10px;",
-                    div(
-                      style = "flex: 1; background: rgba(0, 144, 223, 0.12); border: 1px solid rgba(0, 144, 223, 0.35); border-radius: 8px; padding: 10px; text-align: center;",
-                      div(style = "font-size: 1.6rem; font-weight: 900; color: #38BDF8;", "70"),
-                      div(style = "font-size: 0.78rem; font-weight: 700; color: #F8FAFC; text-transform: uppercase; margin-top: 2px;", "League Stage"),
-                      div(style = "font-size: 0.72rem; color: #94A3B8;", "10 Franchises")
-                    ),
-                    div(
-                      style = "flex: 1; background: rgba(255, 184, 0, 0.12); border: 1px solid rgba(255, 184, 0, 0.35); border-radius: 8px; padding: 10px; text-align: center;",
-                      div(style = "font-size: 1.6rem; font-weight: 900; color: #FFB800;", "4"),
-                      div(style = "font-size: 0.78rem; font-weight: 700; color: #F8FAFC; text-transform: uppercase; margin-top: 2px;", "Playoff Games"),
-                      div(style = "font-size: 0.72rem; color: #94A3B8;", "Q1, Elim, Q2, Final")
-                    )
-                  ),
-                  div(
-                    style = "margin-top: 10px; font-size: 0.75rem; color: #94A3B8; text-align: center; border-top: 1px dashed rgba(255, 255, 255, 0.1); padding-top: 8px;",
-                    "10 Franchises • 17,246 Deliveries • 26,493 Tournament Runs"
-                  )
-                )
+                class = "mention-item winner-mention",
+                span(class = "mention-icon", "🏆"),
+                tags$img(src = "teams/rcb.png", class = "mention-crest", alt = "RCB"),
+                span(class = "mention-title", "Champions:"),
+                span(class = "mention-team", "Royal Challengers Bengaluru"),
+                span(class = "mention-score", "(190/9)")
+              ),
+              div(class = "mention-sep", "•"),
+              div(
+                class = "mention-item runner-mention",
+                span(class = "mention-icon", "🥈"),
+                tags$img(src = "teams/pbks.png", class = "mention-crest", alt = "PBKS"),
+                span(class = "mention-title", "Runners-Up:"),
+                span(class = "mention-team", "Punjab Kings"),
+                span(class = "mention-score", "(184/7)")
+              ),
+              div(class = "mention-sep", "•"),
+              div(
+                class = "mention-item stage-mention",
+                span(class = "mention-icon", "🏟️"),
+                span(class = "mention-text", "74 Matches Total (70 League Stage + 4 Playoffs)")
               )
             ),
             
@@ -1266,7 +1210,7 @@ server <- function(input, output, session) {
       rownames = FALSE,
       class = "compact stripe hover"
     )
-  })
+  }, server = FALSE)
   
   # Overview Table D: Top 5 Bowlers (With Franchise Logos & Protected Borders)
   output$table_top_bowlers <- renderDT({
@@ -1298,7 +1242,7 @@ server <- function(input, output, session) {
       rownames = FALSE,
       class = "compact stripe hover"
     )
-  })
+  }, server = FALSE)
   
   # Overview Table E: Team Rankings Standings (With Team Logos)
   output$table_team_rankings <- renderDT({
@@ -1328,7 +1272,7 @@ server <- function(input, output, session) {
       rownames = FALSE,
       class = "compact stripe hover"
     )
-  })
+  }, server = FALSE)
   
   # ============================================================================
   # PAGE 2: PLAYER ANALYTICS SERVER OUTPUTS
@@ -1928,7 +1872,7 @@ server <- function(input, output, session) {
       rownames = FALSE,
       class = "compact stripe hover"
     )
-  })
+  }, server = FALSE)
   
   # Player Bowling Charts (Luminous & Eye-Catching Lighter Elements)
   output$plot_player_bowl_match_trend <- renderPlotly({
@@ -2122,7 +2066,7 @@ server <- function(input, output, session) {
       rownames = FALSE,
       class = "compact stripe hover"
     )
-  })
+  }, server = FALSE)
   
   # ============================================================================
   # PAGE 3: TEAM ANALYTICS SERVER OUTPUTS (With Team Logo Header)
@@ -2342,7 +2286,7 @@ server <- function(input, output, session) {
       rownames = FALSE,
       class = "compact stripe hover"
     )
-  })
+  }, server = FALSE)
   
   output$table_team_top_bowl <- renderDT({
     req(input$team_select)
@@ -2387,7 +2331,7 @@ server <- function(input, output, session) {
       rownames = FALSE,
       class = "compact stripe hover"
     )
-  })
+  }, server = FALSE)
   
   # ============================================================================
   # PAGE 4: PLAYER COMPARISON STUDIO SERVER OUTPUTS (With Team Logos)
@@ -2983,7 +2927,7 @@ server <- function(input, output, session) {
       rownames = FALSE,
       class = "compact stripe hover"
     )
-  })
+  }, server = FALSE)
 }
 
 # ------------------------------------------------------------------------------
