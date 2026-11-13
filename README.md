@@ -16,12 +16,12 @@ The platform features a modern dark-themed interface, statistically rigorous cri
 
 ## 📌 Key Platform Features
 
-### 1. 📊 IPL 2025 Season Overview & Tournament Special Mention
-- **Special Mention Ribbon for Champions & Runners-Up:**
-  - 🏆 **Champions:** Royal Challengers Bengaluru (**RCB**) (190/9) — Defeated PBKS by 6 runs in the Grand Final at Ahmedabad.
-  - 🥈 **Runners-Up:** Punjab Kings (**PBKS**) (184/7) — Season table-toppers with 3,258 runs.
-  - 🏟️ **Tournament Structure:** 74 Matches Total (70 League Stage + 4 Playoffs).
-  - Designed as a sleek, non-intrusive horizontal mention bar directly above the season KPI cards.
+### 1. 📊 IPL 2025 Season Overview & Championship Showcase
+- **Championship Showcase Bar:**
+  - 🏆 **Champions Podium:** Royal Challengers Bengaluru (**RCB**) (190/9) — Defeated PBKS by 6 runs in the Grand Final at Ahmedabad, lifting their 1st IPL Title with authentic gold-crested podium styling.
+  - 🥈 **Runners-Up Podium:** Punjab Kings (**PBKS**) (184/7) — Grand Finalists and season table-toppers with 3,258 runs.
+  - 🏟️ **Tournament Overview:** 74 Matches Total (70 League Stage + 4 Playoffs across 10 Squads).
+  - Designed as a broadcast-grade, compact 3-podium showcase bar (~75px) directly above the season KPI cards, providing high visual impact without consuming unnecessary vertical space.
 - **Dynamic KPI Cards:** Instant summary of total matches (74), legal deliveries (17,246), cumulative runs scored (26,493), and total dismissals (871 fallen, 830 credited to bowlers).
 - **Runs Distribution by Phase & Innings:** Over-phase breakdown comparing run generation across Powerplay (Overs 1–6), Middle (Overs 7–15), and Death overs (Overs 16–20) for 1st vs 2nd innings.
 - **Franchise Total Runs Comparison:** Horizontal bar rankings of cumulative scoring output across all 10 franchises with team colors.
@@ -69,12 +69,10 @@ The platform features a modern dark-themed interface, statistically rigorous cri
 - **Instant Search with Alphabet-by-Alphabet Autocomplete:** Dedicated search controls for Player A and Player B with real-time suggestions across all 2025 players and aliases.
 - **Universal Franchise & Crest Resolution:** Every player displays their authentic franchise crest and official team code across both Batting and Bowling duels, completely eliminating missing team data or placeholder dashes.
 - **Cricbuzz Intelligence on Comparison Cards:** Player roles, batting styles, and bowling styles displayed directly on the head-to-head cards.
-- **Complete Cross-Discipline Data Display (Specialist Batter & Bowler Handling):**
-  - When comparing batsmen in **Bowling Duel** (e.g., *Virat Kohli vs Shubman Gill*), players receive a clear `Specialist Batter • 0 Overs Bowled in 2025` badge, and an informative advisory banner explains the matchup.
-  - Rather than showing blank or empty cards, their **Primary Tournament Batting Benchmarks** (Tournament Runs, Batting Average, Strike Rate, Boundaries, and Matches) are displayed directly on the cards with duel leader highlights.
-  - The polar radar intelligently adapts to plot their **Primary Tournament Impact Profile** so users can evaluate batting dominance on the radar rather than an empty polygon.
-  - The Head-to-Head Scorecard includes both the bowling baseline (0 wickets, 0.0 overs) and granular primary batting metrics with metric leader arrows (`👈 Player A` / `Player B 👉`).
-  - Symmetrically, specialist bowlers compared in **Batting Duel** display their primary credited wickets, economy rate, and bowling averages alongside batting figures.
+- **Clean, Symmetrical Comparison Cards & Specialist Discipline Intelligence:**
+  - In **Bowling Duel**, cards strictly display bowling metrics (Total Wickets, Legal Overs Bowled, Economy Rate, Bowling Average, Bowling Strike Rate, Dot-Ball %), eliminating extraneous batting boxes for clean visual symmetry and balanced card heights.
+  - When specialist batters who bowled 0 overs (e.g. *Virat Kohli*, *Sai Sudharsan*, *Shubman Gill*) are evaluated, they display official zero-bowling figures (`0 Wkts`, `0.0 Overs`, `—`, `0%`) along with an official badge: `Specialist Batter • 0 Overs Bowled in 2025`.
+  - In **Batting Duel**, cards strictly display batting metrics (Total Runs, Balls Faced, Batting Average, Strike Rate, Boundaries 4s/6s, Boundary %), with specialist bowlers displaying `Specialist Bowler • Primary Bowling Focus`.
 - **Non-IPL Player Validation Alert:** Clear alert banner if either Player A or Player B did not play in the 2025 season.
 - **Identical Selection Notice:** Advisory banner when the same player is selected for both sides.
 - **Dynamic Leader Highlighting:** Automatic detection of metric leaders with visual leader badges (`🏆 DUEL LEADER`) and metric highlight glow.
@@ -82,7 +80,11 @@ The platform features a modern dark-themed interface, statistically rigorous cri
   - Standardizes raw performance metrics onto a 0–100 scale based on IPL 2025 season benchmarks.
   - Properly inverts defensive bowling statistics (Economy Rate, Bowling Average, and Bowling Strike Rate) so lower, superior figures yield higher normalized scores.
   - Interactive tooltips display both normalized scores and actual raw statistics simultaneously.
-- **Comprehensive Client-Side Scorecard Table:** Granular head-to-head comparison powered by client-side DataTables (`server = FALSE`) for instant zero-latency rendering with directional leader indicators.
+- **Head-to-Head Metric Scorecard (Fixed Layout, Zero Congestion):**
+  - Intuitive column ordering: `[Metric | Player A | Player B | Comparison Leader]` directly mirrors the card layout above it.
+  - Strictly aligned proportional widths (`34% | 22% | 22% | 22%`) with `table-layout: fixed !important;` and `scrollX = FALSE`, eliminating detached table headers and horizontal overflow.
+  - Symmetrical leader logic recognizes true bowling participation—an active bowler who conceded runs is recognized ahead of a non-bowler with 0 legal balls.
+  - Fixed internal data frame schemas prevent client-side `DataTables warning: The column name is not found in data` when reactively changing player selections.
 
 ---
 

@@ -215,7 +215,7 @@ testServer(server, {
   session$setInputs(comp_player_a_search = "Virat Kohli", comp_player_b_search = "Shubman Gill", comp_mode = "bowling")
   stopifnot(!is.null(output$comp_content_ui))
   stopifnot(grepl("Specialist Batter", as.character(output$comp_content_ui$html)))
-  stopifnot(grepl("Tournament Runs", as.character(output$comp_content_ui$html)))
+  stopifnot(!grepl("Primary Tournament Batting Impact", as.character(output$comp_content_ui$html)))
   stopifnot(!is.null(output$plot_comp_radar))
   stopifnot(!is.null(output$table_comp_scorecard))
   stopifnot(!is.null(output$comp_player_b_suggestions_ui))
