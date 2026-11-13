@@ -346,13 +346,11 @@ get_player_cricbuzz_meta <- function(player_code) {
     )
   }
   
-  p_teams <- ipl %>% 
-    filter(striker == player_code | bowler == player_code) %>% 
-    pull(batting_team) %>% 
-    unique() %>% 
-    paste(collapse = ", ")
-  
-  if (p_teams == "") p_teams <- "IPL 2025 Squad"
+  bat_teams <- ipl %>% filter(striker == player_code) %>% pull(batting_team) %>% unique()
+  bowl_teams <- ipl %>% filter(bowler == player_code) %>% pull(bowling_team) %>% unique()
+  all_teams <- unique(c(bat_teams, bowl_teams))
+  all_teams <- all_teams[all_teams != "" & !is.na(all_teams)]
+  p_teams <- if (length(all_teams) > 0) paste(all_teams, collapse = ", ") else "IPL 2025 Squad"
   meta$franchise <- p_teams
   meta
 }
@@ -939,6 +937,61 @@ ui <- page_fluid(
           # ====================================================================
           tabPanel(
             "comparison",
+            # Recommended Featured Rivalries (Instant Duel Matchups)
+            div(
+              class = "featured-duels-ribbon",
+              div(
+                class = "featured-duels-header",
+                span(style = "font-size: 1.15rem; color: #FFB800;", "⚔️"),
+                tags$span(style = "font-weight: 800; font-size: 0.88rem; color: #F8FAFC; letter-spacing: 0.5px;", "FEATURED RIVALRIES:"),
+                tags$span(style = "font-size: 0.8rem; color: #94A3B8; margin-left: 4px;", "Click any rivalry to load instant head-to-head comparison")
+              ),
+              div(
+                class = "featured-duels-list",
+                tags$button(
+                  type = "button",
+                  class = "duel-pill-btn",
+                  onclick = "document.getElementById('comp_player_a_search').value = 'Virat Kohli'; Shiny.setInputValue('comp_player_a_search', 'Virat Kohli'); document.getElementById('comp_player_b_search').value = 'Shubman Gill'; Shiny.setInputValue('comp_player_b_search', 'Shubman Gill');",
+                  tags$span(class = "duel-tag", "👑 RUN MACHINES"),
+                  tags$span(class = "duel-names", "Virat Kohli ", tags$b(style = "color: #38BDF8;", "vs"), " Shubman Gill")
+                ),
+                tags$button(
+                  type = "button",
+                  class = "duel-pill-btn",
+                  onclick = "document.getElementById('comp_player_a_search').value = 'Sai Sudharsan'; Shiny.setInputValue('comp_player_a_search', 'Sai Sudharsan'); document.getElementById('comp_player_b_search').value = 'Suryakumar Yadav'; Shiny.setInputValue('comp_player_b_search', 'Suryakumar Yadav');",
+                  tags$span(class = "duel-tag", "💥 ORANGE CAP"),
+                  tags$span(class = "duel-names", "Sai Sudharsan ", tags$b(style = "color: #38BDF8;", "vs"), " Suryakumar Yadav")
+                ),
+                tags$button(
+                  type = "button",
+                  class = "duel-pill-btn",
+                  onclick = "document.getElementById('comp_player_a_search').value = 'Jasprit Bumrah'; Shiny.setInputValue('comp_player_a_search', 'Jasprit Bumrah'); document.getElementById('comp_player_b_search').value = 'Prasidh'; Shiny.setInputValue('comp_player_b_search', 'Prasidh');",
+                  tags$span(class = "duel-tag", "⚡ PACE TITANS"),
+                  tags$span(class = "duel-names", "Jasprit Bumrah ", tags$b(style = "color: #38BDF8;", "vs"), " Prasidh")
+                ),
+                tags$button(
+                  type = "button",
+                  class = "duel-pill-btn",
+                  onclick = "document.getElementById('comp_player_a_search').value = 'Rashid Khan'; Shiny.setInputValue('comp_player_a_search', 'Rashid Khan'); document.getElementById('comp_player_b_search').value = 'Noor Ahmad'; Shiny.setInputValue('comp_player_b_search', 'Noor Ahmad');",
+                  tags$span(class = "duel-tag", "🌪️ SPIN WIZARDS"),
+                  tags$span(class = "duel-names", "Rashid Khan ", tags$b(style = "color: #38BDF8;", "vs"), " Noor Ahmad")
+                ),
+                tags$button(
+                  type = "button",
+                  class = "duel-pill-btn",
+                  onclick = "document.getElementById('comp_player_a_search').value = 'Travis Head'; Shiny.setInputValue('comp_player_a_search', 'Travis Head'); document.getElementById('comp_player_b_search').value = 'Heinrich Klaasen'; Shiny.setInputValue('comp_player_b_search', 'Heinrich Klaasen');",
+                  tags$span(class = "duel-tag", "🚀 POWER DEMOLISHERS"),
+                  tags$span(class = "duel-names", "Travis Head ", tags$b(style = "color: #38BDF8;", "vs"), " Heinrich Klaasen")
+                ),
+                tags$button(
+                  type = "button",
+                  class = "duel-pill-btn",
+                  onclick = "document.getElementById('comp_player_a_search').value = 'Rohit Sharma'; Shiny.setInputValue('comp_player_a_search', 'Rohit Sharma'); document.getElementById('comp_player_b_search').value = 'KL Rahul'; Shiny.setInputValue('comp_player_b_search', 'KL Rahul');",
+                  tags$span(class = "duel-tag", "⭐ CLASSIC MASTERS"),
+                  tags$span(class = "duel-names", "Rohit Sharma ", tags$b(style = "color: #38BDF8;", "vs"), " KL Rahul")
+                )
+              )
+            ),
             # Selectors Bar
             div(
               class = "filter-panel",
@@ -970,6 +1023,23 @@ ui <- page_fluid(
                     tags$datalist(
                       id = "ipl_comp_datalist_a",
                       lapply(all_search_suggestions, function(p) tags$option(value = p))
+                    )
+                  ),
+                  # Quick Pick Player A Chips
+                  div(
+                    class = "quick-chips-wrap",
+                    style = "margin-top: 8px;",
+                    span(style = "font-size: 0.76rem; font-weight: 700; color: #94A3B8; margin-right: 4px; align-self: center;", "⚡ Quick Pick:"),
+                    lapply(
+                      c("Virat Kohli", "Shubman Gill", "Jasprit Bumrah", "Sai Sudharsan", "Suryakumar Yadav", "Rashid Khan"),
+                      function(star) {
+                        tags$button(
+                          type = "button",
+                          class = "quick-chip-btn",
+                          onclick = sprintf("document.getElementById('comp_player_a_search').value = '%s'; Shiny.setInputValue('comp_player_a_search', '%s');", star, star),
+                          star
+                        )
+                      }
                     )
                   )
                 ),
@@ -1005,7 +1075,9 @@ ui <- page_fluid(
                       id = "ipl_comp_datalist_b",
                       lapply(all_search_suggestions, function(p) tags$option(value = p))
                     )
-                  )
+                  ),
+                  # Dynamic Competing Rivals for Player B
+                  uiOutput("comp_player_b_suggestions_ui")
                 ),
                 # Hidden element for test backwards-compatibility
                 tags$div(style = "display: none;", selectizeInput("comp_player_b", label = NULL, choices = all_players, selected = "Suryakumar Yadav"))
@@ -2334,9 +2406,64 @@ server <- function(input, output, session) {
   }, server = FALSE)
   
   # ============================================================================
-  # PAGE 4: PLAYER COMPARISON STUDIO SERVER OUTPUTS (With Team Logos)
+  # PAGE 4: PLAYER COMPARISON STUDIO SERVER OUTPUTS (With Team Logos & Dynamic Intelligence)
   # ============================================================================
   
+  # Dynamic Competing Rivals for Player B based on Player A's role
+  output$comp_player_b_suggestions_ui <- renderUI({
+    comp <- get_comp_players()
+    p_a <- comp$resolved_a
+    
+    if (is.null(p_a)) {
+      suggested_rivals <- c("Shubman Gill", "Suryakumar Yadav", "Virat Kohli", "Jasprit Bumrah", "Travis Head")
+      p_name <- "IPL Stars"
+    } else {
+      meta_a <- get_player_cricbuzz_meta(p_a)
+      p_name <- meta_a$full_name
+      role_a <- meta_a$role
+      
+      if (grepl("Bowler", role_a, ignore.case = TRUE)) {
+        candidates <- bowling_summary %>% 
+          filter(bowler != p_a) %>% 
+          pull(bowler)
+        suggested_rivals <- head(unique(sapply(candidates, function(c) {
+          if (c %in% names(cricbuzz_db)) cricbuzz_db[[c]]$full_name else c
+        })), 5)
+      } else if (grepl("Allrounder", role_a, ignore.case = TRUE)) {
+        allrounders <- c("Hardik Pandya", "Andre Russell", "Sunil Narine", "Axar Patel", "Sam Curran", "Marcus Stoinis", "Glenn Maxwell", "Ravindra Jadeja")
+        suggested_rivals <- head(setdiff(allrounders, p_name), 5)
+      } else {
+        candidates <- batting_summary %>% 
+          filter(striker != p_a) %>% 
+          pull(striker)
+        suggested_rivals <- head(unique(sapply(candidates, function(c) {
+          if (c %in% names(cricbuzz_db)) cricbuzz_db[[c]]$full_name else c
+        })), 5)
+      }
+    }
+    
+    div(
+      class = "suggested-rivals-wrap",
+      div(
+        class = "suggested-rivals-label",
+        span("⚡ Competing Rivals for"),
+        tags$b(style = "color: #38BDF8;", p_name),
+        span(":")
+      ),
+      div(
+        class = "rival-chips-row",
+        lapply(suggested_rivals, function(rival) {
+          tags$button(
+            type = "button",
+            class = "suggested-rival-btn",
+            onclick = sprintf("document.getElementById('comp_player_b_search').value = '%s'; Shiny.setInputValue('comp_player_b_search', '%s');", rival, rival),
+            rival
+          )
+        })
+      )
+    )
+  })
+
   output$comp_validation_ui <- renderUI({
     comp <- get_comp_players()
     
@@ -2411,92 +2538,155 @@ server <- function(input, output, session) {
     meta_b <- get_player_cricbuzz_meta(p_b)
     mode <- input$comp_mode
     
+    # Accurate Team Logos and Franchises
+    first_team_a <- tolower(trimws(strsplit(meta_a$franchise, ",")[[1]][1]))
+    first_team_b <- tolower(trimws(strsplit(meta_b$franchise, ",")[[1]][1]))
+    logo_a <- get_team_logo_path(first_team_a)
+    logo_b <- get_team_logo_path(first_team_b)
+    
+    # Complete Data Retrieval for both Batting and Bowling
+    bat_stat_a <- batting_summary %>% filter(striker == p_a)
+    bat_stat_b <- batting_summary %>% filter(striker == p_b)
+    bowl_stat_a <- bowling_summary %>% filter(bowler == p_a)
+    bowl_stat_b <- bowling_summary %>% filter(bowler == p_b)
+    
+    runs_a <- if (nrow(bat_stat_a) > 0) bat_stat_a$runs else 0
+    balls_a <- if (nrow(bat_stat_a) > 0) bat_stat_a$balls else 0
+    sr_a <- if (nrow(bat_stat_a) > 0) bat_stat_a$strike_rate else 0
+    avg_a <- if (nrow(bat_stat_a) > 0 && !is.na(bat_stat_a$batting_avg)) bat_stat_a$batting_avg else 0
+    fours_a <- if (nrow(bat_stat_a) > 0) bat_stat_a$fours else 0
+    sixes_a <- if (nrow(bat_stat_a) > 0) bat_stat_a$sixes else 0
+    bpct_a <- if (nrow(bat_stat_a) > 0) bat_stat_a$boundary_pct else 0
+    matches_bat_a <- if (nrow(bat_stat_a) > 0) bat_stat_a$matches else 0
+    
+    runs_b <- if (nrow(bat_stat_b) > 0) bat_stat_b$runs else 0
+    balls_b <- if (nrow(bat_stat_b) > 0) bat_stat_b$balls else 0
+    sr_b <- if (nrow(bat_stat_b) > 0) bat_stat_b$strike_rate else 0
+    avg_b <- if (nrow(bat_stat_b) > 0 && !is.na(bat_stat_b$batting_avg)) bat_stat_b$batting_avg else 0
+    fours_b <- if (nrow(bat_stat_b) > 0) bat_stat_b$fours else 0
+    sixes_b <- if (nrow(bat_stat_b) > 0) bat_stat_b$sixes else 0
+    bpct_b <- if (nrow(bat_stat_b) > 0) bat_stat_b$boundary_pct else 0
+    matches_bat_b <- if (nrow(bat_stat_b) > 0) bat_stat_b$matches else 0
+    
+    wkts_a <- if (nrow(bowl_stat_a) > 0) bowl_stat_a$wickets else 0
+    runs_conceded_a <- if (nrow(bowl_stat_a) > 0) bowl_stat_a$runs_conceded else 0
+    legal_balls_a <- if (nrow(bowl_stat_a) > 0) bowl_stat_a$legal_balls else 0
+    overs_a <- if (nrow(bowl_stat_a) > 0) bowl_stat_a$overs_display else "0.0"
+    econ_a <- if (nrow(bowl_stat_a) > 0 && !is.na(bowl_stat_a$economy)) bowl_stat_a$economy else NA
+    bowl_avg_a <- if (nrow(bowl_stat_a) > 0 && !is.na(bowl_stat_a$bowling_avg)) bowl_stat_a$bowling_avg else NA
+    bowl_sr_a <- if (nrow(bowl_stat_a) > 0 && !is.na(bowl_stat_a$bowling_sr)) bowl_stat_a$bowling_sr else NA
+    dot_a <- if (nrow(bowl_stat_a) > 0) bowl_stat_a$dot_pct else 0
+    matches_bowl_a <- if (nrow(bowl_stat_a) > 0) bowl_stat_a$matches else 0
+    
+    wkts_b <- if (nrow(bowl_stat_b) > 0) bowl_stat_b$wickets else 0
+    runs_conceded_b <- if (nrow(bowl_stat_b) > 0) bowl_stat_b$runs_conceded else 0
+    legal_balls_b <- if (nrow(bowl_stat_b) > 0) bowl_stat_b$legal_balls else 0
+    overs_b <- if (nrow(bowl_stat_b) > 0) bowl_stat_b$overs_display else "0.0"
+    econ_b <- if (nrow(bowl_stat_b) > 0 && !is.na(bowl_stat_b$economy)) bowl_stat_b$economy else NA
+    bowl_avg_b <- if (nrow(bowl_stat_b) > 0 && !is.na(bowl_stat_b$bowling_avg)) bowl_stat_b$bowling_avg else NA
+    bowl_sr_b <- if (nrow(bowl_stat_b) > 0 && !is.na(bowl_stat_b$bowling_sr)) bowl_stat_b$bowling_sr else NA
+    dot_b <- if (nrow(bowl_stat_b) > 0) bowl_stat_b$dot_pct else 0
+    matches_bowl_b <- if (nrow(bowl_stat_b) > 0) bowl_stat_b$matches else 0
+    
+    both_batters <- (legal_balls_a == 0 && legal_balls_b == 0)
+    both_bowlers <- (balls_a == 0 && balls_b == 0)
+    
     if (mode == "batting") {
-      stat_a <- batting_summary %>% filter(striker == p_a)
-      stat_b <- batting_summary %>% filter(striker == p_b)
-      
-      runs_a <- if (nrow(stat_a) > 0) stat_a$runs else 0
-      balls_a <- if (nrow(stat_a) > 0) stat_a$balls else 0
-      sr_a <- if (nrow(stat_a) > 0) stat_a$strike_rate else 0
-      avg_a <- if (nrow(stat_a) > 0 && !is.na(stat_a$batting_avg)) stat_a$batting_avg else 0
-      fours_a <- if (nrow(stat_a) > 0) stat_a$fours else 0
-      sixes_a <- if (nrow(stat_a) > 0) stat_a$sixes else 0
-      bpct_a <- if (nrow(stat_a) > 0) stat_a$boundary_pct else 0
-      matches_a <- if (nrow(stat_a) > 0) stat_a$matches else 0
-      team_a <- if (nrow(stat_a) > 0) stat_a$teams else "—"
-      
-      runs_b <- if (nrow(stat_b) > 0) stat_b$runs else 0
-      balls_b <- if (nrow(stat_b) > 0) stat_b$balls else 0
-      sr_b <- if (nrow(stat_b) > 0) stat_b$strike_rate else 0
-      avg_b <- if (nrow(stat_b) > 0 && !is.na(stat_b$batting_avg)) stat_b$batting_avg else 0
-      fours_b <- if (nrow(stat_b) > 0) stat_b$fours else 0
-      sixes_b <- if (nrow(stat_b) > 0) stat_b$sixes else 0
-      bpct_b <- if (nrow(stat_b) > 0) stat_b$boundary_pct else 0
-      matches_b <- if (nrow(stat_b) > 0) stat_b$matches else 0
-      team_b <- if (nrow(stat_b) > 0) stat_b$teams else "—"
-      
-      first_team_a <- tolower(trimws(strsplit(team_a, ",")[[1]][1]))
-      first_team_b <- tolower(trimws(strsplit(team_b, ",")[[1]][1]))
-      
-      wins_a <- sum(c(runs_a > runs_b, sr_a > sr_b, avg_a > avg_b, (fours_a + sixes_a) > (fours_b + sixes_b), bpct_a > bpct_b))
-      wins_b <- sum(c(runs_b > runs_a, sr_b > sr_a, avg_b > avg_a, (fours_b + sixes_b) > (fours_a + sixes_a), bpct_b > bpct_a))
+      if (both_bowlers) {
+        wins_a <- sum(c(wkts_a > wkts_b, (!is.na(econ_a) && !is.na(econ_b) && econ_a < econ_b) || (!is.na(econ_a) && is.na(econ_b)), (!is.na(bowl_avg_a) && !is.na(bowl_avg_b) && bowl_avg_a < bowl_avg_b) || (!is.na(bowl_avg_a) && is.na(bowl_avg_b)), dot_a > dot_b))
+        wins_b <- sum(c(wkts_b > wkts_a, (!is.na(econ_b) && !is.na(econ_a) && econ_b < econ_a) || (!is.na(econ_b) && is.na(econ_a)), (!is.na(bowl_avg_b) && !is.na(bowl_avg_a) && bowl_avg_b < bowl_avg_a) || (!is.na(bowl_avg_b) && is.na(bowl_avg_a)), dot_b > dot_a))
+      } else {
+        wins_a <- sum(c(runs_a > runs_b, sr_a > sr_b, avg_a > avg_b, (fours_a + sixes_a) > (fours_b + sixes_b), bpct_a > bpct_b))
+        wins_b <- sum(c(runs_b > runs_a, sr_b > sr_a, avg_b > avg_a, (fours_b + sixes_b) > (fours_a + sixes_a), bpct_b > bpct_a))
+      }
       
       tagList(
+        if (both_bowlers) {
+          div(
+            class = "specialist-advisory-banner",
+            div(class = "specialist-advisory-icon", "⚡"),
+            div(
+              class = "specialist-advisory-text",
+              tags$h4("Specialist Bowlers Head-to-Head (Batting Duel Mode)"),
+              tags$p(paste0("Neither ", meta_a$full_name, " nor ", meta_b$full_name, " faced legal deliveries in IPL 2025. Presenting their primary bowling tournament impact alongside batting records so complete head-to-head performance is evaluated."))
+            )
+          )
+        } else NULL,
         div(
           class = "comparison-grid",
-          # Player A Card with Franchise Crest & Cricbuzz Meta
+          # Player A Card
           div(
             class = paste("player-card", ifelse(wins_a > wins_b, "winner", "")),
             if (wins_a > wins_b) span(class = "leader-pill", "🏆 DUEL LEADER"),
             div(
               class = "player-card-header-row",
-              if (!is.null(get_team_logo_path(first_team_a))) tags$img(src = get_team_logo_path(first_team_a), class = "player-card-team-logo", alt = team_a) else NULL,
+              if (!is.null(logo_a)) tags$img(src = logo_a, class = "player-card-team-logo", alt = meta_a$franchise) else NULL,
               div(
                 tags$h3(style = "color: #38BDF8; margin: 0;", meta_a$full_name),
-                tags$p(style = "color: #94A3B8; font-size: 0.85rem; margin: 2px 0 0 0;", paste("Franchise:", team_a)),
+                tags$p(style = "color: #94A3B8; font-size: 0.85rem; margin: 2px 0 0 0;", paste("Franchise:", meta_a$franchise)),
                 div(
                   style = "display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px;",
                   span(style = "background: rgba(0, 144, 223, 0.2); border: 1px solid rgba(0, 144, 223, 0.4); color: #38BDF8; font-size: 0.72rem; padding: 2px 8px; border-radius: 4px; font-weight: 600;", meta_a$role),
                   span(style = "background: rgba(255, 255, 255, 0.08); color: #CBD5E1; font-size: 0.72rem; padding: 2px 8px; border-radius: 4px;", meta_a$bat_style)
-                )
+                ),
+                if (both_bowlers || balls_a == 0) span(class = "specialist-badge", "Specialist Bowler • Primary Bowling Focus") else NULL
               )
             ),
             div(class = "metric-row", span(class = "metric-label", "Total Runs"), span(class = paste("metric-val", ifelse(runs_a >= runs_b, "lead", "")), runs_a)),
             div(class = "metric-row", span(class = "metric-label", "Strike Rate"), span(class = paste("metric-val", ifelse(sr_a >= sr_b, "lead", "")), sr_a)),
             div(class = "metric-row", span(class = "metric-label", "Batting Average"), span(class = paste("metric-val", ifelse(avg_a >= avg_b, "lead", "")), ifelse(avg_a > 0, avg_a, "—"))),
             div(class = "metric-row", span(class = "metric-label", "Boundaries (4s / 6s)"), span(class = paste("metric-val", ifelse(fours_a + sixes_a >= fours_b + sixes_b, "lead", "")), paste0(fours_a, " / ", sixes_a))),
-            div(class = "metric-row", span(class = "metric-label", "Boundary %"), span(class = paste("metric-val", ifelse(bpct_a >= bpct_b, "lead", "")), paste0(bpct_a, "%")))
+            div(class = "metric-row", span(class = "metric-label", "Boundary %"), span(class = paste("metric-val", ifelse(bpct_a >= bpct_b, "lead", "")), paste0(bpct_a, "%"))),
+            if (both_bowlers || balls_a == 0) {
+              div(
+                class = "primary-impact-box",
+                div(class = "primary-impact-title", "⭐ Primary Bowling Impact:"),
+                div(class = "metric-row", span(class = "metric-label", "Credited Wickets"), span(class = paste("metric-val", ifelse(wkts_a >= wkts_b, "lead", "")), wkts_a)),
+                div(class = "metric-row", span(class = "metric-label", "Economy Rate"), span(class = paste("metric-val", ifelse(!is.na(econ_a) && (is.na(econ_b) || econ_a <= econ_b), "lead", "")), ifelse(!is.na(econ_a), econ_a, "—"))),
+                div(class = "metric-row", span(class = "metric-label", "Bowling Average"), span(class = paste("metric-val", ifelse(!is.na(bowl_avg_a) && (is.na(bowl_avg_b) || bowl_avg_a <= bowl_avg_b), "lead", "")), ifelse(!is.na(bowl_avg_a), bowl_avg_a, "—")))
+              )
+            } else NULL
           ),
           
           # Central VS Badge
           div(class = "vs-badge-container", div(class = "vs-badge", "VS")),
           
-          # Player B Card with Franchise Crest & Cricbuzz Meta
+          # Player B Card
           div(
             class = paste("player-card", ifelse(wins_b > wins_a, "winner", "")),
             if (wins_b > wins_a) span(class = "leader-pill", "🏆 DUEL LEADER"),
             div(
               class = "player-card-header-row",
-              if (!is.null(get_team_logo_path(first_team_b))) tags$img(src = get_team_logo_path(first_team_b), class = "player-card-team-logo", alt = team_b) else NULL,
+              if (!is.null(logo_b)) tags$img(src = logo_b, class = "player-card-team-logo", alt = meta_b$franchise) else NULL,
               div(
                 tags$h3(style = "color: #FDE047; margin: 0;", meta_b$full_name),
-                tags$p(style = "color: #94A3B8; font-size: 0.85rem; margin: 2px 0 0 0;", paste("Franchise:", team_b)),
+                tags$p(style = "color: #94A3B8; font-size: 0.85rem; margin: 2px 0 0 0;", paste("Franchise:", meta_b$franchise)),
                 div(
                   style = "display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px;",
                   span(style = "background: rgba(253, 224, 71, 0.2); border: 1px solid rgba(253, 224, 71, 0.4); color: #FDE047; font-size: 0.72rem; padding: 2px 8px; border-radius: 4px; font-weight: 600;", meta_b$role),
                   span(style = "background: rgba(255, 255, 255, 0.08); color: #CBD5E1; font-size: 0.72rem; padding: 2px 8px; border-radius: 4px;", meta_b$bat_style)
-                )
+                ),
+                if (both_bowlers || balls_b == 0) span(class = "specialist-badge", "Specialist Bowler • Primary Bowling Focus") else NULL
               )
             ),
             div(class = "metric-row", span(class = "metric-label", "Total Runs"), span(class = paste("metric-val", ifelse(runs_b >= runs_a, "lead", "")), runs_b)),
             div(class = "metric-row", span(class = "metric-label", "Strike Rate"), span(class = paste("metric-val", ifelse(sr_b >= sr_a, "lead", "")), sr_b)),
             div(class = "metric-row", span(class = "metric-label", "Batting Average"), span(class = paste("metric-val", ifelse(avg_b >= avg_a, "lead", "")), ifelse(avg_b > 0, avg_b, "—"))),
             div(class = "metric-row", span(class = "metric-label", "Boundaries (4s / 6s)"), span(class = paste("metric-val", ifelse(fours_b + sixes_b >= fours_a + sixes_a, "lead", "")), paste0(fours_b, " / ", sixes_b))),
-            div(class = "metric-row", span(class = "metric-label", "Boundary %"), span(class = paste("metric-val", ifelse(bpct_b >= bpct_a, "lead", "")), paste0(bpct_b, "%")))
+            div(class = "metric-row", span(class = "metric-label", "Boundary %"), span(class = paste("metric-val", ifelse(bpct_b >= bpct_a, "lead", "")), paste0(bpct_b, "%"))),
+            if (both_bowlers || balls_b == 0) {
+              div(
+                class = "primary-impact-box",
+                div(class = "primary-impact-title", "⭐ Primary Bowling Impact:"),
+                div(class = "metric-row", span(class = "metric-label", "Credited Wickets"), span(class = paste("metric-val", ifelse(wkts_b >= wkts_a, "lead", "")), wkts_b)),
+                div(class = "metric-row", span(class = "metric-label", "Economy Rate"), span(class = paste("metric-val", ifelse(!is.na(econ_b) && (is.na(econ_a) || econ_b <= econ_a), "lead", "")), ifelse(!is.na(econ_b), econ_b, "—"))),
+                div(class = "metric-row", span(class = "metric-label", "Bowling Average"), span(class = paste("metric-val", ifelse(!is.na(bowl_avg_b) && (is.na(bowl_avg_a) || bowl_avg_b <= bowl_avg_a), "lead", "")), ifelse(!is.na(bowl_avg_b), bowl_avg_b, "—")))
+              )
+            } else NULL
           )
         ),
         
-        # Radar & Metrics Table Row (Light Card Background)
+        # Radar & Metrics Table Row
         fluidRow(
           column(
             width = 6,
@@ -2506,8 +2696,8 @@ server <- function(input, output, session) {
                 class = "analytics-card-header",
                 div(
                   class = "card-title-group",
-                  tags$h2("Normalized Batting Radar (0–100 Scale)"),
-                  tags$p("Scaled against IPL 2025 season benchmarks")
+                  tags$h2(ifelse(both_bowlers, "Primary Impact Radar: Bowling Profile (0–100 Scale)", "Normalized Batting Radar (0–100 Scale)")),
+                  tags$p(ifelse(both_bowlers, "Scaled against IPL 2025 bowling benchmarks (inverted economy/avg)", "Scaled against IPL 2025 season benchmarks"))
                 ),
                 span(class = "card-action-pill", "Radar Model")
               ),
@@ -2537,72 +2727,74 @@ server <- function(input, output, session) {
       )
     } else {
       # Bowling Duel Mode
-      stat_a <- bowling_summary %>% filter(bowler == p_a)
-      stat_b <- bowling_summary %>% filter(bowler == p_b)
-      
-      wkts_a <- if (nrow(stat_a) > 0) stat_a$wickets else 0
-      balls_a <- if (nrow(stat_a) > 0) stat_a$legal_balls else 0
-      overs_a <- if (nrow(stat_a) > 0) stat_a$overs_display else "0.0"
-      runs_a <- if (nrow(stat_a) > 0) stat_a$runs_conceded else 0
-      econ_a <- if (nrow(stat_a) > 0 && !is.na(stat_a$economy)) stat_a$economy else NA
-      avg_a <- if (nrow(stat_a) > 0 && !is.na(stat_a$bowling_avg)) stat_a$bowling_avg else NA
-      sr_a <- if (nrow(stat_a) > 0 && !is.na(stat_a$bowling_sr)) stat_a$bowling_sr else NA
-      dot_a <- if (nrow(stat_a) > 0) stat_a$dot_pct else 0
-      team_a <- if (nrow(stat_a) > 0) stat_a$teams else "—"
-      
-      wkts_b <- if (nrow(stat_b) > 0) stat_b$wickets else 0
-      balls_b <- if (nrow(stat_b) > 0) stat_b$legal_balls else 0
-      overs_b <- if (nrow(stat_b) > 0) stat_b$overs_display else "0.0"
-      runs_b <- if (nrow(stat_b) > 0) stat_b$runs_conceded else 0
-      econ_b <- if (nrow(stat_b) > 0 && !is.na(stat_b$economy)) stat_b$economy else NA
-      avg_b <- if (nrow(stat_b) > 0 && !is.na(stat_b$bowling_avg)) stat_b$bowling_avg else NA
-      sr_b <- if (nrow(stat_b) > 0 && !is.na(stat_b$bowling_sr)) stat_b$bowling_sr else NA
-      dot_b <- if (nrow(stat_b) > 0) stat_b$dot_pct else 0
-      team_b <- if (nrow(stat_b) > 0) stat_b$teams else "—"
-      
-      first_team_a <- tolower(trimws(strsplit(team_a, ",")[[1]][1]))
-      first_team_b <- tolower(trimws(strsplit(team_b, ",")[[1]][1]))
-      
-      w_a <- sum(c(
-        wkts_a > wkts_b,
-        (!is.na(econ_a) && !is.na(econ_b) && econ_a < econ_b) || (!is.na(econ_a) && is.na(econ_b)),
-        (!is.na(avg_a) && !is.na(avg_b) && avg_a < avg_b) || (!is.na(avg_a) && is.na(avg_b)),
-        (!is.na(sr_a) && !is.na(sr_b) && sr_a < sr_b) || (!is.na(sr_a) && is.na(sr_b)),
-        dot_a > dot_b
-      ))
-      w_b <- sum(c(
-        wkts_b > wkts_a,
-        (!is.na(econ_b) && !is.na(econ_a) && econ_b < econ_a) || (!is.na(econ_b) && is.na(econ_a)),
-        (!is.na(avg_b) && !is.na(avg_a) && avg_b < avg_a) || (!is.na(avg_b) && is.na(avg_a)),
-        (!is.na(sr_b) && !is.na(sr_a) && sr_b < sr_a) || (!is.na(sr_b) && is.na(sr_a)),
-        dot_b > dot_a
-      ))
+      if (both_batters) {
+        # Both are specialist batters - evaluate duel leader on primary tournament batting impact!
+        wins_a <- sum(c(runs_a > runs_b, sr_a > sr_b, avg_a > avg_b, (fours_a + sixes_a) > (fours_b + sixes_b), bpct_a > bpct_b))
+        wins_b <- sum(c(runs_b > runs_a, sr_b > sr_a, avg_b > avg_a, (fours_b + sixes_b) > (fours_a + sixes_a), bpct_b > bpct_a))
+      } else {
+        wins_a <- sum(c(
+          wkts_a > wkts_b,
+          (!is.na(econ_a) && !is.na(econ_b) && econ_a < econ_b) || (!is.na(econ_a) && is.na(econ_b)),
+          (!is.na(bowl_avg_a) && !is.na(bowl_avg_b) && bowl_avg_a < bowl_avg_b) || (!is.na(bowl_avg_a) && is.na(bowl_avg_b)),
+          (!is.na(bowl_sr_a) && !is.na(bowl_sr_b) && bowl_sr_a < bowl_sr_b) || (!is.na(bowl_sr_a) && is.na(bowl_sr_b)),
+          dot_a > dot_b
+        ))
+        wins_b <- sum(c(
+          wkts_b > wkts_a,
+          (!is.na(econ_b) && !is.na(econ_a) && econ_b < econ_a) || (!is.na(econ_b) && is.na(econ_a)),
+          (!is.na(bowl_avg_b) && !is.na(bowl_avg_a) && bowl_avg_b < bowl_avg_a) || (!is.na(bowl_avg_b) && is.na(bowl_avg_a)),
+          (!is.na(bowl_sr_b) && !is.na(bowl_sr_a) && bowl_sr_b < bowl_sr_a) || (!is.na(bowl_sr_b) && is.na(bowl_sr_a)),
+          dot_b > dot_a
+        ))
+      }
       
       tagList(
+        if (both_batters) {
+          div(
+            class = "specialist-advisory-banner",
+            div(class = "specialist-advisory-icon", "🏏"),
+            div(
+              class = "specialist-advisory-text",
+              tags$h4("Specialist Batters Head-to-Head (Bowling Duel Mode)"),
+              tags$p(paste0("Neither ", meta_a$full_name, " nor ", meta_b$full_name, " bowled legal overs in IPL 2025. Presenting their primary tournament batting benchmarks alongside official bowling records so complete head-to-head performance is evaluated."))
+            )
+          )
+        } else NULL,
         div(
           class = "comparison-grid",
           # Player A Card
           div(
-            class = paste("player-card", ifelse(w_a > w_b, "winner", "")),
-            if (w_a > w_b) span(class = "leader-pill", "🏆 DUEL LEADER"),
+            class = paste("player-card", ifelse(wins_a > wins_b, "winner", "")),
+            if (wins_a > wins_b) span(class = "leader-pill", "🏆 DUEL LEADER"),
             div(
               class = "player-card-header-row",
-              if (!is.null(get_team_logo_path(first_team_a))) tags$img(src = get_team_logo_path(first_team_a), class = "player-card-team-logo", alt = team_a) else NULL,
+              if (!is.null(logo_a)) tags$img(src = logo_a, class = "player-card-team-logo", alt = meta_a$franchise) else NULL,
               div(
                 tags$h3(style = "color: #38BDF8; margin: 0;", meta_a$full_name),
-                tags$p(style = "color: #94A3B8; font-size: 0.85rem; margin: 2px 0 0 0;", paste("Franchise:", team_a)),
+                tags$p(style = "color: #94A3B8; font-size: 0.85rem; margin: 2px 0 0 0;", paste("Franchise:", meta_a$franchise)),
                 div(
                   style = "display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px;",
                   span(style = "background: rgba(0, 144, 223, 0.2); border: 1px solid rgba(0, 144, 223, 0.4); color: #38BDF8; font-size: 0.72rem; padding: 2px 8px; border-radius: 4px; font-weight: 600;", meta_a$role),
                   span(style = "background: rgba(255, 255, 255, 0.08); color: #CBD5E1; font-size: 0.72rem; padding: 2px 8px; border-radius: 4px;", meta_a$bowl_style)
-                )
+                ),
+                if (both_batters || legal_balls_a == 0) span(class = "specialist-badge", "Specialist Batter • 0 Overs Bowled in 2025") else NULL
               )
             ),
             div(class = "metric-row", span(class = "metric-label", "Credited Wickets"), span(class = paste("metric-val", ifelse(wkts_a >= wkts_b, "lead", "")), wkts_a)),
+            div(class = "metric-row", span(class = "metric-label", "Legal Overs Bowled"), span(class = paste("metric-val", ifelse(legal_balls_a >= legal_balls_b, "lead", "")), overs_a)),
             div(class = "metric-row", span(class = "metric-label", "Economy Rate"), span(class = paste("metric-val", ifelse(!is.na(econ_a) && (is.na(econ_b) || econ_a <= econ_b), "lead", "")), ifelse(!is.na(econ_a), econ_a, "—"))),
-            div(class = "metric-row", span(class = "metric-label", "Bowling Average"), span(class = paste("metric-val", ifelse(!is.na(avg_a) && (is.na(avg_b) || avg_a <= avg_b), "lead", "")), ifelse(!is.na(avg_a), avg_a, "—"))),
-            div(class = "metric-row", span(class = "metric-label", "Strike Rate"), span(class = paste("metric-val", ifelse(!is.na(sr_a) && (is.na(sr_b) || sr_a <= sr_b), "lead", "")), ifelse(!is.na(sr_a), sr_a, "—"))),
-            div(class = "metric-row", span(class = "metric-label", "Dot-Ball %"), span(class = paste("metric-val", ifelse(dot_a >= dot_b, "lead", "")), paste0(dot_a, "%")))
+            div(class = "metric-row", span(class = "metric-label", "Bowling Average"), span(class = paste("metric-val", ifelse(!is.na(bowl_avg_a) && (is.na(bowl_avg_b) || bowl_avg_a <= bowl_avg_b), "lead", "")), ifelse(!is.na(bowl_avg_a), bowl_avg_a, "—"))),
+            div(class = "metric-row", span(class = "metric-label", "Dot-Ball %"), span(class = paste("metric-val", ifelse(dot_a >= dot_b, "lead", "")), paste0(dot_a, "%"))),
+            if (both_batters || legal_balls_a == 0) {
+              div(
+                class = "primary-impact-box",
+                div(class = "primary-impact-title", "⭐ Primary Tournament Batting Impact:"),
+                div(class = "metric-row", span(class = "metric-label", "Tournament Runs"), span(class = paste("metric-val", ifelse(runs_a >= runs_b, "lead", "")), runs_a)),
+                div(class = "metric-row", span(class = "metric-label", "Batting Average"), span(class = paste("metric-val", ifelse(avg_a >= avg_b, "lead", "")), ifelse(avg_a > 0, avg_a, "—"))),
+                div(class = "metric-row", span(class = "metric-label", "Batting Strike Rate"), span(class = paste("metric-val", ifelse(sr_a >= sr_b, "lead", "")), sr_a)),
+                div(class = "metric-row", span(class = "metric-label", "Boundaries (4s / 6s)"), span(class = paste("metric-val", ifelse(fours_a + sixes_a >= fours_b + sixes_b, "lead", "")), paste0(fours_a, " / ", sixes_a)))
+              )
+            } else NULL
           ),
           
           # Central VS Badge
@@ -2610,30 +2802,41 @@ server <- function(input, output, session) {
           
           # Player B Card
           div(
-            class = paste("player-card", ifelse(w_b > w_a, "winner", "")),
-            if (w_b > w_a) span(class = "leader-pill", "🏆 DUEL LEADER"),
+            class = paste("player-card", ifelse(wins_b > wins_a, "winner", "")),
+            if (wins_b > wins_a) span(class = "leader-pill", "🏆 DUEL LEADER"),
             div(
               class = "player-card-header-row",
-              if (!is.null(get_team_logo_path(first_team_b))) tags$img(src = get_team_logo_path(first_team_b), class = "player-card-team-logo", alt = team_b) else NULL,
+              if (!is.null(logo_b)) tags$img(src = logo_b, class = "player-card-team-logo", alt = meta_b$franchise) else NULL,
               div(
                 tags$h3(style = "color: #FDE047; margin: 0;", meta_b$full_name),
-                tags$p(style = "color: #94A3B8; font-size: 0.85rem; margin: 2px 0 0 0;", paste("Franchise:", team_b)),
+                tags$p(style = "color: #94A3B8; font-size: 0.85rem; margin: 2px 0 0 0;", paste("Franchise:", meta_b$franchise)),
                 div(
                   style = "display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px;",
                   span(style = "background: rgba(253, 224, 71, 0.2); border: 1px solid rgba(253, 224, 71, 0.4); color: #FDE047; font-size: 0.72rem; padding: 2px 8px; border-radius: 4px; font-weight: 600;", meta_b$role),
                   span(style = "background: rgba(255, 255, 255, 0.08); color: #CBD5E1; font-size: 0.72rem; padding: 2px 8px; border-radius: 4px;", meta_b$bowl_style)
-                )
+                ),
+                if (both_batters || legal_balls_b == 0) span(class = "specialist-badge", "Specialist Batter • 0 Overs Bowled in 2025") else NULL
               )
             ),
             div(class = "metric-row", span(class = "metric-label", "Credited Wickets"), span(class = paste("metric-val", ifelse(wkts_b >= wkts_a, "lead", "")), wkts_b)),
+            div(class = "metric-row", span(class = "metric-label", "Legal Overs Bowled"), span(class = paste("metric-val", ifelse(legal_balls_b >= legal_balls_a, "lead", "")), overs_b)),
             div(class = "metric-row", span(class = "metric-label", "Economy Rate"), span(class = paste("metric-val", ifelse(!is.na(econ_b) && (is.na(econ_a) || econ_b <= econ_a), "lead", "")), ifelse(!is.na(econ_b), econ_b, "—"))),
-            div(class = "metric-row", span(class = "metric-label", "Bowling Average"), span(class = paste("metric-val", ifelse(!is.na(avg_b) && (is.na(avg_a) || avg_b <= avg_a), "lead", "")), ifelse(!is.na(avg_b), avg_b, "—"))),
-            div(class = "metric-row", span(class = "metric-label", "Strike Rate"), span(class = paste("metric-val", ifelse(!is.na(sr_b) && (is.na(sr_a) || sr_b <= sr_a), "lead", "")), ifelse(!is.na(sr_b), sr_b, "—"))),
-            div(class = "metric-row", span(class = "metric-label", "Dot-Ball %"), span(class = paste("metric-val", ifelse(dot_b >= dot_a, "lead", "")), paste0(dot_b, "%")))
+            div(class = "metric-row", span(class = "metric-label", "Bowling Average"), span(class = paste("metric-val", ifelse(!is.na(bowl_avg_b) && (is.na(bowl_avg_a) || bowl_avg_b <= bowl_avg_a), "lead", "")), ifelse(!is.na(bowl_avg_b), bowl_avg_b, "—"))),
+            div(class = "metric-row", span(class = "metric-label", "Dot-Ball %"), span(class = paste("metric-val", ifelse(dot_b >= dot_a, "lead", "")), paste0(dot_b, "%"))),
+            if (both_batters || legal_balls_b == 0) {
+              div(
+                class = "primary-impact-box",
+                div(class = "primary-impact-title", "⭐ Primary Tournament Batting Impact:"),
+                div(class = "metric-row", span(class = "metric-label", "Tournament Runs"), span(class = paste("metric-val", ifelse(runs_b >= runs_a, "lead", "")), runs_b)),
+                div(class = "metric-row", span(class = "metric-label", "Batting Average"), span(class = paste("metric-val", ifelse(avg_b >= avg_a, "lead", "")), ifelse(avg_b > 0, avg_b, "—"))),
+                div(class = "metric-row", span(class = "metric-label", "Batting Strike Rate"), span(class = paste("metric-val", ifelse(sr_b >= sr_a, "lead", "")), sr_b)),
+                div(class = "metric-row", span(class = "metric-label", "Boundaries (4s / 6s)"), span(class = paste("metric-val", ifelse(fours_b + sixes_b >= fours_a + sixes_a, "lead", "")), paste0(fours_b, " / ", sixes_b)))
+              )
+            } else NULL
           )
         ),
         
-        # Radar & Metrics Table Row (Light Card Background)
+        # Radar & Metrics Table Row
         fluidRow(
           column(
             width = 6,
@@ -2643,8 +2846,8 @@ server <- function(input, output, session) {
                 class = "analytics-card-header",
                 div(
                   class = "card-title-group",
-                  tags$h2("Normalized Bowling Radar (0–100 Scale)"),
-                  tags$p("Scaled against IPL 2025 season benchmarks (inverted for economy/avg)")
+                  tags$h2(ifelse(both_batters, "Primary Impact Radar: Batting Profile (0–100 Scale)", "Normalized Bowling Radar (0–100 Scale)")),
+                  tags$p(ifelse(both_batters, "Scaled against IPL 2025 batting benchmarks for specialist batters", "Scaled against IPL 2025 season benchmarks (inverted for economy/avg)"))
                 ),
                 span(class = "card-action-pill", "Radar Model")
               ),
@@ -2675,7 +2878,7 @@ server <- function(input, output, session) {
     }
   })
   
-  # Radar Chart Rendering (Light, Spacious, Attractive Polar Layout)
+  # Radar Chart Rendering (Light, Spacious, Attractive Polar Layout with Specialist Adaptations)
   output$plot_comp_radar <- renderPlotly({
     req(input$comp_mode)
     comp <- get_comp_players()
@@ -2684,94 +2887,139 @@ server <- function(input, output, session) {
     p_b <- comp$resolved_b
     mode <- input$comp_mode
     
+    stat_bat_a <- batting_summary %>% filter(striker == p_a)
+    stat_bat_b <- batting_summary %>% filter(striker == p_b)
+    stat_bowl_a <- bowling_summary %>% filter(bowler == p_a)
+    stat_bowl_b <- bowling_summary %>% filter(bowler == p_b)
+    
+    runs_a <- if (nrow(stat_bat_a) > 0) stat_bat_a$runs else 0
+    runs_b <- if (nrow(stat_bat_b) > 0) stat_bat_b$runs else 0
+    sr_a <- if (nrow(stat_bat_a) > 0) stat_bat_a$strike_rate else 0
+    sr_b <- if (nrow(stat_bat_b) > 0) stat_bat_b$strike_rate else 0
+    avg_a <- if (nrow(stat_bat_a) > 0 && !is.na(stat_bat_a$batting_avg)) stat_bat_a$batting_avg else 0
+    avg_b <- if (nrow(stat_bat_b) > 0 && !is.na(stat_bat_b$batting_avg)) stat_bat_b$batting_avg else 0
+    bnd_a <- if (nrow(stat_bat_a) > 0) (stat_bat_a$fours + stat_bat_a$sixes) else 0
+    bnd_b <- if (nrow(stat_bat_b) > 0) (stat_bat_b$fours + stat_bat_b$sixes) else 0
+    bpct_a <- if (nrow(stat_bat_a) > 0) stat_bat_a$boundary_pct else 0
+    bpct_b <- if (nrow(stat_bat_b) > 0) stat_bat_b$boundary_pct else 0
+    balls_a <- if (nrow(stat_bat_a) > 0) stat_bat_a$balls else 0
+    balls_b <- if (nrow(stat_bat_b) > 0) stat_bat_b$balls else 0
+    matches_bat_a <- if (nrow(stat_bat_a) > 0) stat_bat_a$matches else 0
+    matches_bat_b <- if (nrow(stat_bat_b) > 0) stat_bat_b$matches else 0
+    
+    wkts_a <- if (nrow(stat_bowl_a) > 0) stat_bowl_a$wickets else 0
+    wkts_b <- if (nrow(stat_bowl_b) > 0) stat_bowl_b$wickets else 0
+    econ_a <- if (nrow(stat_bowl_a) > 0 && !is.na(stat_bowl_a$economy)) stat_bowl_a$economy else 12.0
+    econ_b <- if (nrow(stat_bowl_b) > 0 && !is.na(stat_bowl_b$economy)) stat_bowl_b$economy else 12.0
+    bowl_avg_a <- if (nrow(stat_bowl_a) > 0 && !is.na(stat_bowl_a$bowling_avg)) stat_bowl_a$bowling_avg else 45.0
+    bowl_avg_b <- if (nrow(stat_bowl_b) > 0 && !is.na(stat_bowl_b$bowling_avg)) stat_bowl_b$bowling_avg else 45.0
+    bowl_sr_a <- if (nrow(stat_bowl_a) > 0 && !is.na(stat_bowl_a$bowling_sr)) stat_bowl_a$bowling_sr else 30.0
+    bowl_sr_b <- if (nrow(stat_bowl_b) > 0 && !is.na(stat_bowl_b$bowling_sr)) stat_bowl_b$bowling_sr else 30.0
+    dot_a <- if (nrow(stat_bowl_a) > 0) stat_bowl_a$dot_pct else 0
+    dot_b <- if (nrow(stat_bowl_b) > 0) stat_bowl_b$dot_pct else 0
+    overs_a <- if (nrow(stat_bowl_a) > 0) stat_bowl_a$overs else 0
+    overs_b <- if (nrow(stat_bowl_b) > 0) stat_bowl_b$overs else 0
+    
+    both_batters <- (overs_a == 0 && overs_b == 0)
+    both_bowlers <- (balls_a == 0 && balls_b == 0)
+    
     if (mode == "batting") {
-      stat_a <- batting_summary %>% filter(striker == p_a)
-      stat_b <- batting_summary %>% filter(striker == p_b)
-      
-      cats <- c("Runs", "Strike Rate", "Batting Avg", "Boundaries", "Boundary %", "Balls Faced")
-      
-      runs_a <- if (nrow(stat_a) > 0) stat_a$runs else 0
-      sr_a <- if (nrow(stat_a) > 0) stat_a$strike_rate else 0
-      avg_a <- if (nrow(stat_a) > 0 && !is.na(stat_a$batting_avg)) stat_a$batting_avg else 0
-      bnd_a <- if (nrow(stat_a) > 0) (stat_a$fours + stat_a$sixes) else 0
-      bpct_a <- if (nrow(stat_a) > 0) stat_a$boundary_pct else 0
-      balls_a <- if (nrow(stat_a) > 0) stat_a$balls else 0
-      
-      runs_b <- if (nrow(stat_b) > 0) stat_b$runs else 0
-      sr_b <- if (nrow(stat_b) > 0) stat_b$strike_rate else 0
-      avg_b <- if (nrow(stat_b) > 0 && !is.na(stat_b$batting_avg)) stat_b$batting_avg else 0
-      bnd_b <- if (nrow(stat_b) > 0) (stat_b$fours + stat_b$sixes) else 0
-      bpct_b <- if (nrow(stat_b) > 0) stat_b$boundary_pct else 0
-      balls_b <- if (nrow(stat_b) > 0) stat_b$balls else 0
-      
-      max_runs <- max(batting_summary$runs)
-      max_balls <- max(batting_summary$balls)
-      max_bnd <- max(batting_summary$fours + batting_summary$sixes)
-      
-      norm_a <- c(
-        normalize_metric(runs_a, 0, max_runs),
-        normalize_metric(sr_a, 80, 200),
-        normalize_metric(avg_a, 10, 65),
-        normalize_metric(bnd_a, 0, max_bnd),
-        normalize_metric(bpct_a, 0, 90),
-        normalize_metric(balls_a, 0, max_balls)
-      )
-      
-      norm_b <- c(
-        normalize_metric(runs_b, 0, max_runs),
-        normalize_metric(sr_b, 80, 200),
-        normalize_metric(avg_b, 10, 65),
-        normalize_metric(bnd_b, 0, max_bnd),
-        normalize_metric(bpct_b, 0, 90),
-        normalize_metric(balls_b, 0, max_balls)
-      )
-      
-      hover_a <- paste0(cats, "<br><b>", p_a, ": </b>", c(runs_a, paste0(sr_a, " SR"), avg_a, bnd_a, paste0(bpct_a, "%"), balls_a), "<br>Score: ", norm_a, "/100")
-      hover_b <- paste0(cats, "<br><b>", p_b, ": </b>", c(runs_b, paste0(sr_b, " SR"), avg_b, bnd_b, paste0(bpct_b, "%"), balls_b), "<br>Score: ", norm_b, "/100")
-      
+      if (both_bowlers) {
+        # Both are bowlers in batting duel -> plot primary bowling radar
+        cats <- c("Wickets", "Economy", "Bowling Avg", "Strike Rate", "Dot Ball %", "Overs")
+        max_wkts <- max(bowling_summary$wickets)
+        max_overs <- max(bowling_summary$overs)
+        norm_a <- c(
+          normalize_metric(wkts_a, 0, max_wkts),
+          normalize_metric(econ_a, 6.0, 12.0, invert = TRUE),
+          normalize_metric(bowl_avg_a, 15.0, 45.0, invert = TRUE),
+          normalize_metric(bowl_sr_a, 10.0, 30.0, invert = TRUE),
+          normalize_metric(dot_a, 15.0, 50.0),
+          normalize_metric(overs_a, 0, max_overs)
+        )
+        norm_b <- c(
+          normalize_metric(wkts_b, 0, max_wkts),
+          normalize_metric(econ_b, 6.0, 12.0, invert = TRUE),
+          normalize_metric(bowl_avg_b, 15.0, 45.0, invert = TRUE),
+          normalize_metric(bowl_sr_b, 10.0, 30.0, invert = TRUE),
+          normalize_metric(dot_b, 15.0, 50.0),
+          normalize_metric(overs_b, 0, max_overs)
+        )
+        hover_a <- paste0(cats, "<br><b>", p_a, " (Bowling Profile): </b>", c(wkts_a, econ_a, bowl_avg_a, bowl_sr_a, paste0(dot_a, "%"), overs_a), "<br>Score: ", norm_a, "/100")
+        hover_b <- paste0(cats, "<br><b>", p_b, " (Bowling Profile): </b>", c(wkts_b, econ_b, bowl_avg_b, bowl_sr_b, paste0(dot_b, "%"), overs_b), "<br>Score: ", norm_b, "/100")
+      } else {
+        cats <- c("Runs", "Strike Rate", "Batting Avg", "Boundaries", "Boundary %", "Balls Faced")
+        max_runs <- max(batting_summary$runs)
+        max_balls <- max(batting_summary$balls)
+        max_bnd <- max(batting_summary$fours + batting_summary$sixes)
+        norm_a <- c(
+          normalize_metric(runs_a, 0, max_runs),
+          normalize_metric(sr_a, 80, 200),
+          normalize_metric(avg_a, 10, 65),
+          normalize_metric(bnd_a, 0, max_bnd),
+          normalize_metric(bpct_a, 0, 90),
+          normalize_metric(balls_a, 0, max_balls)
+        )
+        norm_b <- c(
+          normalize_metric(runs_b, 0, max_runs),
+          normalize_metric(sr_b, 80, 200),
+          normalize_metric(avg_b, 10, 65),
+          normalize_metric(bnd_b, 0, max_bnd),
+          normalize_metric(bpct_b, 0, 90),
+          normalize_metric(balls_b, 0, max_balls)
+        )
+        hover_a <- paste0(cats, "<br><b>", p_a, ": </b>", c(runs_a, paste0(sr_a, " SR"), avg_a, bnd_a, paste0(bpct_a, "%"), balls_a), "<br>Score: ", norm_a, "/100")
+        hover_b <- paste0(cats, "<br><b>", p_b, ": </b>", c(runs_b, paste0(sr_b, " SR"), avg_b, bnd_b, paste0(bpct_b, "%"), balls_b), "<br>Score: ", norm_b, "/100")
+      }
     } else {
-      stat_a <- bowling_summary %>% filter(bowler == p_a)
-      stat_b <- bowling_summary %>% filter(bowler == p_b)
-      
-      cats <- c("Wickets", "Economy", "Bowling Avg", "Strike Rate", "Dot Ball %", "Overs")
-      
-      wkts_a <- if (nrow(stat_a) > 0) stat_a$wickets else 0
-      econ_a <- if (nrow(stat_a) > 0 && !is.na(stat_a$economy)) stat_a$economy else 12.0
-      avg_a <- if (nrow(stat_a) > 0 && !is.na(stat_a$bowling_avg)) stat_a$bowling_avg else 45.0
-      sr_a <- if (nrow(stat_a) > 0 && !is.na(stat_a$bowling_sr)) stat_a$bowling_sr else 30.0
-      dot_a <- if (nrow(stat_a) > 0) stat_a$dot_pct else 0
-      overs_a <- if (nrow(stat_a) > 0) stat_a$overs else 0
-      
-      wkts_b <- if (nrow(stat_b) > 0) stat_b$wickets else 0
-      econ_b <- if (nrow(stat_b) > 0 && !is.na(stat_b$economy)) stat_b$economy else 12.0
-      avg_b <- if (nrow(stat_b) > 0 && !is.na(stat_b$bowling_avg)) stat_b$bowling_avg else 45.0
-      sr_b <- if (nrow(stat_b) > 0 && !is.na(stat_b$bowling_sr)) stat_b$bowling_sr else 30.0
-      dot_b <- if (nrow(stat_b) > 0) stat_b$dot_pct else 0
-      overs_b <- if (nrow(stat_b) > 0) stat_b$overs else 0
-      
-      max_wkts <- max(bowling_summary$wickets)
-      max_overs <- max(bowling_summary$overs)
-      
-      norm_a <- c(
-        normalize_metric(wkts_a, 0, max_wkts),
-        normalize_metric(econ_a, 6.0, 12.0, invert = TRUE),
-        normalize_metric(avg_a, 15.0, 45.0, invert = TRUE),
-        normalize_metric(sr_a, 10.0, 30.0, invert = TRUE),
-        normalize_metric(dot_a, 15.0, 50.0),
-        normalize_metric(overs_a, 0, max_overs)
-      )
-      
-      norm_b <- c(
-        normalize_metric(wkts_b, 0, max_wkts),
-        normalize_metric(econ_b, 6.0, 12.0, invert = TRUE),
-        normalize_metric(avg_b, 15.0, 45.0, invert = TRUE),
-        normalize_metric(sr_b, 10.0, 30.0, invert = TRUE),
-        normalize_metric(dot_b, 15.0, 50.0),
-        normalize_metric(overs_b, 0, max_overs)
-      )
-      
-      hover_a <- paste0(cats, "<br><b>", p_a, ": </b>", c(wkts_a, econ_a, avg_a, sr_a, paste0(dot_a, "%"), overs_a), "<br>Score: ", norm_a, "/100")
-      hover_b <- paste0(cats, "<br><b>", p_b, ": </b>", c(wkts_b, econ_b, avg_b, sr_b, paste0(dot_b, "%"), overs_b), "<br>Score: ", norm_b, "/100")
+      # Bowling mode
+      if (both_batters) {
+        # Both are specialist batters in bowling duel -> plot primary tournament batting radar!
+        cats <- c("Total Runs", "Strike Rate", "Batting Avg", "Boundaries", "Boundary %", "Matches")
+        max_runs <- max(batting_summary$runs)
+        max_bnd <- max(batting_summary$fours + batting_summary$sixes)
+        max_matches <- max(batting_summary$matches)
+        norm_a <- c(
+          normalize_metric(runs_a, 0, max_runs),
+          normalize_metric(sr_a, 80, 200),
+          normalize_metric(avg_a, 10, 65),
+          normalize_metric(bnd_a, 0, max_bnd),
+          normalize_metric(bpct_a, 0, 90),
+          normalize_metric(matches_bat_a, 0, max_matches)
+        )
+        norm_b <- c(
+          normalize_metric(runs_b, 0, max_runs),
+          normalize_metric(sr_b, 80, 200),
+          normalize_metric(avg_b, 10, 65),
+          normalize_metric(bnd_b, 0, max_bnd),
+          normalize_metric(bpct_b, 0, 90),
+          normalize_metric(matches_bat_b, 0, max_matches)
+        )
+        hover_a <- paste0(cats, "<br><b>", p_a, " (Batting Profile): </b>", c(runs_a, paste0(sr_a, " SR"), avg_a, bnd_a, paste0(bpct_a, "%"), matches_bat_a), "<br>Score: ", norm_a, "/100")
+        hover_b <- paste0(cats, "<br><b>", p_b, " (Batting Profile): </b>", c(runs_b, paste0(sr_b, " SR"), avg_b, bnd_b, paste0(bpct_b, "%"), matches_bat_b), "<br>Score: ", norm_b, "/100")
+      } else {
+        cats <- c("Wickets", "Economy", "Bowling Avg", "Strike Rate", "Dot Ball %", "Overs")
+        max_wkts <- max(bowling_summary$wickets)
+        max_overs <- max(bowling_summary$overs)
+        norm_a <- c(
+          normalize_metric(wkts_a, 0, max_wkts),
+          normalize_metric(econ_a, 6.0, 12.0, invert = TRUE),
+          normalize_metric(bowl_avg_a, 15.0, 45.0, invert = TRUE),
+          normalize_metric(bowl_sr_a, 10.0, 30.0, invert = TRUE),
+          normalize_metric(dot_a, 15.0, 50.0),
+          normalize_metric(overs_a, 0, max_overs)
+        )
+        norm_b <- c(
+          normalize_metric(wkts_b, 0, max_wkts),
+          normalize_metric(econ_b, 6.0, 12.0, invert = TRUE),
+          normalize_metric(bowl_avg_b, 15.0, 45.0, invert = TRUE),
+          normalize_metric(bowl_sr_b, 10.0, 30.0, invert = TRUE),
+          normalize_metric(dot_b, 15.0, 50.0),
+          normalize_metric(overs_b, 0, max_overs)
+        )
+        hover_a <- paste0(cats, "<br><b>", p_a, ": </b>", c(wkts_a, econ_a, bowl_avg_a, bowl_sr_a, paste0(dot_a, "%"), overs_a), "<br>Score: ", norm_a, "/100")
+        hover_b <- paste0(cats, "<br><b>", p_b, ": </b>", c(wkts_b, econ_b, bowl_avg_b, bowl_sr_b, paste0(dot_b, "%"), overs_b), "<br>Score: ", norm_b, "/100")
+      }
     }
     
     p <- plot_ly(type = "scatterpolar", mode = "lines+markers", fill = "toself") %>%
@@ -2840,75 +3088,119 @@ server <- function(input, output, session) {
     p_b <- comp$resolved_b
     mode <- input$comp_mode
     
+    stat_bat_a <- batting_summary %>% filter(striker == p_a)
+    stat_bat_b <- batting_summary %>% filter(striker == p_b)
+    stat_bowl_a <- bowling_summary %>% filter(bowler == p_a)
+    stat_bowl_b <- bowling_summary %>% filter(bowler == p_b)
+    
+    runs_a <- if (nrow(stat_bat_a) > 0) stat_bat_a$runs else 0
+    runs_b <- if (nrow(stat_bat_b) > 0) stat_bat_b$runs else 0
+    balls_a <- if (nrow(stat_bat_a) > 0) stat_bat_a$balls else 0
+    balls_b <- if (nrow(stat_bat_b) > 0) stat_bat_b$balls else 0
+    sr_a <- if (nrow(stat_bat_a) > 0) stat_bat_a$strike_rate else 0
+    sr_b <- if (nrow(stat_bat_b) > 0) stat_bat_b$strike_rate else 0
+    avg_a <- if (nrow(stat_bat_a) > 0 && !is.na(stat_bat_a$batting_avg)) stat_bat_a$batting_avg else 0
+    avg_b <- if (nrow(stat_bat_b) > 0 && !is.na(stat_bat_b$batting_avg)) stat_bat_b$batting_avg else 0
+    fours_a <- if (nrow(stat_bat_a) > 0) stat_bat_a$fours else 0
+    fours_b <- if (nrow(stat_bat_b) > 0) stat_bat_b$fours else 0
+    sixes_a <- if (nrow(stat_bat_a) > 0) stat_bat_a$sixes else 0
+    sixes_b <- if (nrow(stat_bat_b) > 0) stat_bat_b$sixes else 0
+    bpct_a <- if (nrow(stat_bat_a) > 0) stat_bat_a$boundary_pct else 0
+    bpct_b <- if (nrow(stat_bat_b) > 0) stat_bat_b$boundary_pct else 0
+    matches_bat_a <- if (nrow(stat_bat_a) > 0) stat_bat_a$matches else 0
+    matches_bat_b <- if (nrow(stat_bat_b) > 0) stat_bat_b$matches else 0
+    
+    wkts_a <- if (nrow(stat_bowl_a) > 0) stat_bowl_a$wickets else 0
+    wkts_b <- if (nrow(stat_bowl_b) > 0) stat_bowl_b$wickets else 0
+    runs_conceded_a <- if (nrow(stat_bowl_a) > 0) stat_bowl_a$runs_conceded else 0
+    runs_conceded_b <- if (nrow(stat_bowl_b) > 0) stat_bowl_b$runs_conceded else 0
+    legal_balls_a <- if (nrow(stat_bowl_a) > 0) stat_bowl_a$legal_balls else 0
+    legal_balls_b <- if (nrow(stat_bowl_b) > 0) stat_bowl_b$legal_balls else 0
+    econ_a <- if (nrow(stat_bowl_a) > 0 && !is.na(stat_bowl_a$economy)) stat_bowl_a$economy else NA
+    econ_b <- if (nrow(stat_bowl_b) > 0 && !is.na(stat_bowl_b$economy)) stat_bowl_b$economy else NA
+    bowl_avg_a <- if (nrow(stat_bowl_a) > 0 && !is.na(stat_bowl_a$bowling_avg)) stat_bowl_a$bowling_avg else NA
+    bowl_avg_b <- if (nrow(stat_bowl_b) > 0 && !is.na(stat_bowl_b$bowling_avg)) stat_bowl_b$bowling_avg else NA
+    bowl_sr_a <- if (nrow(stat_bowl_a) > 0 && !is.na(stat_bowl_a$bowling_sr)) stat_bowl_a$bowling_sr else NA
+    bowl_sr_b <- if (nrow(stat_bowl_b) > 0 && !is.na(stat_bowl_b$bowling_sr)) stat_bowl_b$bowling_sr else NA
+    dot_a <- if (nrow(stat_bowl_a) > 0) stat_bowl_a$dot_pct else 0
+    dot_b <- if (nrow(stat_bowl_b) > 0) stat_bowl_b$dot_pct else 0
+    matches_bowl_a <- if (nrow(stat_bowl_a) > 0) stat_bowl_a$matches else 0
+    matches_bowl_b <- if (nrow(stat_bowl_b) > 0) stat_bowl_b$matches else 0
+    
+    both_batters <- (legal_balls_a == 0 && legal_balls_b == 0)
+    both_bowlers <- (balls_a == 0 && balls_b == 0)
+    
     if (mode == "batting") {
-      stat_a <- batting_summary %>% filter(striker == p_a)
-      stat_b <- batting_summary %>% filter(striker == p_b)
-      
-      runs_a <- if (nrow(stat_a) > 0) stat_a$runs else 0
-      runs_b <- if (nrow(stat_b) > 0) stat_b$runs else 0
-      balls_a <- if (nrow(stat_a) > 0) stat_a$balls else 0
-      balls_b <- if (nrow(stat_b) > 0) stat_b$balls else 0
-      sr_a <- if (nrow(stat_a) > 0) stat_a$strike_rate else 0
-      sr_b <- if (nrow(stat_b) > 0) stat_b$strike_rate else 0
-      avg_a <- if (nrow(stat_a) > 0 && !is.na(stat_a$batting_avg)) stat_a$batting_avg else 0
-      avg_b <- if (nrow(stat_b) > 0 && !is.na(stat_b$batting_avg)) stat_b$batting_avg else 0
-      fours_a <- if (nrow(stat_a) > 0) stat_a$fours else 0
-      fours_b <- if (nrow(stat_b) > 0) stat_b$fours else 0
-      sixes_a <- if (nrow(stat_a) > 0) stat_a$sixes else 0
-      sixes_b <- if (nrow(stat_b) > 0) stat_b$sixes else 0
-      bpct_a <- if (nrow(stat_a) > 0) stat_a$boundary_pct else 0
-      bpct_b <- if (nrow(stat_b) > 0) stat_b$boundary_pct else 0
-      matches_a <- if (nrow(stat_a) > 0) stat_a$matches else 0
-      matches_b <- if (nrow(stat_b) > 0) stat_b$matches else 0
-      
-      score_df <- tibble(
-        Metric = c("Total Runs", "Balls Faced", "Batting Average", "Strike Rate", "Fours (4s)", "Sixes (6s)", "Boundary Run %", "Matches Played"),
-        `Player A` = as.character(c(runs_a, balls_a, ifelse(avg_a > 0, avg_a, "—"), sr_a, fours_a, sixes_a, paste0(bpct_a, "%"), matches_a)),
-        Leader = c(
-          ifelse(runs_a > runs_b, paste("👈", p_a), ifelse(runs_b > runs_a, paste(p_b, "👉"), "Tie")),
-          ifelse(balls_a > balls_b, paste("👈", p_a), ifelse(balls_b > balls_a, paste(p_b, "👉"), "Tie")),
-          ifelse(avg_a > avg_b, paste("👈", p_a), ifelse(avg_b > avg_a, paste(p_b, "👉"), "Tie")),
-          ifelse(sr_a > sr_b, paste("👈", p_a), ifelse(sr_b > sr_a, paste(p_b, "👉"), "Tie")),
-          ifelse(fours_a > fours_b, paste("👈", p_a), ifelse(fours_b > fours_a, paste(p_b, "👉"), "Tie")),
-          ifelse(sixes_a > sixes_b, paste("👈", p_a), ifelse(sixes_b > sixes_a, paste(p_b, "👉"), "Tie")),
-          ifelse(bpct_a > bpct_b, paste("👈", p_a), ifelse(bpct_b > bpct_a, paste(p_b, "👉"), "Tie")),
-          ifelse(matches_a > matches_b, paste("👈", p_a), ifelse(matches_b > matches_a, paste(p_b, "👉"), "Tie"))
-        ),
-        `Player B` = as.character(c(runs_b, balls_b, ifelse(avg_b > 0, avg_b, "—"), sr_b, fours_b, sixes_b, paste0(bpct_b, "%"), matches_b))
-      )
+      if (both_bowlers) {
+        score_df <- tibble(
+          Metric = c("Total Runs", "Balls Faced", "Strike Rate", 
+                     "Primary Credited Wickets", "Economy Rate", "Bowling Average", "Dot-Ball %", "Matches Played"),
+          `Player A` = as.character(c(runs_a, balls_a, ifelse(sr_a > 0, sr_a, "—"), wkts_a, ifelse(!is.na(econ_a), econ_a, "—"), ifelse(!is.na(bowl_avg_a), bowl_avg_a, "—"), paste0(dot_a, "%"), matches_bowl_a)),
+          Leader = c(
+            ifelse(runs_a > runs_b, paste("👈", p_a), ifelse(runs_b > runs_a, paste(p_b, "👉"), "Tie")),
+            ifelse(balls_a > balls_b, paste("👈", p_a), ifelse(balls_b > balls_a, paste(p_b, "👉"), "Tie")),
+            ifelse(sr_a > sr_b, paste("👈", p_a), ifelse(sr_b > sr_a, paste(p_b, "👉"), "Tie")),
+            ifelse(wkts_a > wkts_b, paste("👈", p_a), ifelse(wkts_b > wkts_a, paste(p_b, "👉"), "Tie")),
+            ifelse(!is.na(econ_a) && (is.na(econ_b) || econ_a < econ_b), paste("👈", p_a), ifelse(!is.na(econ_b) && (is.na(econ_a) || econ_b < econ_a), paste(p_b, "👉"), "Tie")),
+            ifelse(!is.na(bowl_avg_a) && (is.na(bowl_avg_b) || bowl_avg_a < bowl_avg_b), paste("👈", p_a), ifelse(!is.na(bowl_avg_b) && (is.na(bowl_avg_a) || bowl_avg_b < bowl_avg_a), paste(p_b, "👉"), "Tie")),
+            ifelse(dot_a > dot_b, paste("👈", p_a), ifelse(dot_b > dot_a, paste(p_b, "👉"), "Tie")),
+            ifelse(matches_bowl_a > matches_bowl_b, paste("👈", p_a), ifelse(matches_bowl_b > matches_bowl_a, paste(p_b, "👉"), "Tie"))
+          ),
+          `Player B` = as.character(c(runs_b, balls_b, ifelse(sr_b > 0, sr_b, "—"), wkts_b, ifelse(!is.na(econ_b), econ_b, "—"), ifelse(!is.na(bowl_avg_b), bowl_avg_b, "—"), paste0(dot_b, "%"), matches_bowl_b))
+        )
+      } else {
+        score_df <- tibble(
+          Metric = c("Total Runs", "Balls Faced", "Batting Average", "Strike Rate", "Fours (4s)", "Sixes (6s)", "Boundary Run %", "Matches Played"),
+          `Player A` = as.character(c(runs_a, balls_a, ifelse(avg_a > 0, avg_a, "—"), sr_a, fours_a, sixes_a, paste0(bpct_a, "%"), matches_bat_a)),
+          Leader = c(
+            ifelse(runs_a > runs_b, paste("👈", p_a), ifelse(runs_b > runs_a, paste(p_b, "👉"), "Tie")),
+            ifelse(balls_a > balls_b, paste("👈", p_a), ifelse(balls_b > balls_a, paste(p_b, "👉"), "Tie")),
+            ifelse(avg_a > avg_b, paste("👈", p_a), ifelse(avg_b > avg_a, paste(p_b, "👉"), "Tie")),
+            ifelse(sr_a > sr_b, paste("👈", p_a), ifelse(sr_b > sr_a, paste(p_b, "👉"), "Tie")),
+            ifelse(fours_a > fours_b, paste("👈", p_a), ifelse(fours_b > fours_a, paste(p_b, "👉"), "Tie")),
+            ifelse(sixes_a > sixes_b, paste("👈", p_a), ifelse(sixes_b > sixes_a, paste(p_b, "👉"), "Tie")),
+            ifelse(bpct_a > bpct_b, paste("👈", p_a), ifelse(bpct_b > bpct_a, paste(p_b, "👉"), "Tie")),
+            ifelse(matches_bat_a > matches_bat_b, paste("👈", p_a), ifelse(matches_bat_b > matches_bat_a, paste(p_b, "👉"), "Tie"))
+          ),
+          `Player B` = as.character(c(runs_b, balls_b, ifelse(avg_b > 0, avg_b, "—"), sr_b, fours_b, sixes_b, paste0(bpct_b, "%"), matches_bat_b))
+        )
+      }
     } else {
-      stat_a <- bowling_summary %>% filter(bowler == p_a)
-      stat_b <- bowling_summary %>% filter(bowler == p_b)
-      
-      wkts_a <- if (nrow(stat_a) > 0) stat_a$wickets else 0
-      wkts_b <- if (nrow(stat_b) > 0) stat_b$wickets else 0
-      runs_a <- if (nrow(stat_a) > 0) stat_a$runs_conceded else 0
-      runs_b <- if (nrow(stat_b) > 0) stat_b$runs_conceded else 0
-      balls_a <- if (nrow(stat_a) > 0) stat_a$legal_balls else 0
-      balls_b <- if (nrow(stat_b) > 0) stat_b$legal_balls else 0
-      econ_a <- if (nrow(stat_a) > 0 && !is.na(stat_a$economy)) stat_a$economy else NA
-      econ_b <- if (nrow(stat_b) > 0 && !is.na(stat_b$economy)) stat_b$economy else NA
-      avg_a <- if (nrow(stat_a) > 0 && !is.na(stat_a$bowling_avg)) stat_a$bowling_avg else NA
-      avg_b <- if (nrow(stat_b) > 0 && !is.na(stat_b$bowling_avg)) stat_b$bowling_avg else NA
-      sr_a <- if (nrow(stat_a) > 0 && !is.na(stat_a$bowling_sr)) stat_a$bowling_sr else NA
-      sr_b <- if (nrow(stat_b) > 0 && !is.na(stat_b$bowling_sr)) stat_b$bowling_sr else NA
-      dot_a <- if (nrow(stat_a) > 0) stat_a$dot_pct else 0
-      dot_b <- if (nrow(stat_b) > 0) stat_b$dot_pct else 0
-      
-      score_df <- tibble(
-        Metric = c("Total Wickets", "Runs Conceded", "Legal Balls Bowled", "Economy Rate", "Bowling Average", "Bowling Strike Rate", "Dot-Ball %"),
-        `Player A` = as.character(c(wkts_a, runs_a, balls_a, ifelse(!is.na(econ_a), econ_a, "—"), ifelse(!is.na(avg_a), avg_a, "—"), ifelse(!is.na(sr_a), sr_a, "—"), paste0(dot_a, "%"))),
-        Leader = c(
-          ifelse(wkts_a > wkts_b, paste("👈", p_a), ifelse(wkts_b > wkts_a, paste(p_b, "👉"), "Tie")),
-          ifelse(runs_a < runs_b, paste("👈", p_a), ifelse(runs_b < runs_a, paste(p_b, "👉"), "Tie")),
-          ifelse(balls_a > balls_b, paste("👈", p_a), ifelse(balls_b > balls_a, paste(p_b, "👉"), "Tie")),
-          ifelse(!is.na(econ_a) && (is.na(econ_b) || econ_a < econ_b), paste("👈", p_a), ifelse(!is.na(econ_b) && (is.na(econ_a) || econ_b < econ_a), paste(p_b, "👉"), "Tie")),
-          ifelse(!is.na(avg_a) && (is.na(avg_b) || avg_a < avg_b), paste("👈", p_a), ifelse(!is.na(avg_b) && (is.na(avg_a) || avg_b < avg_a), paste(p_b, "👉"), "Tie")),
-          ifelse(!is.na(sr_a) && (is.na(sr_b) || sr_a < sr_b), paste("👈", p_a), ifelse(!is.na(sr_b) && (is.na(sr_a) || sr_b < sr_a), paste(p_b, "👉"), "Tie")),
-          ifelse(dot_a > dot_b, paste("👈", p_a), ifelse(dot_b > dot_a, paste(p_b, "👉"), "Tie"))
-        ),
-        `Player B` = as.character(c(wkts_b, runs_b, balls_b, ifelse(!is.na(econ_b), econ_b, "—"), ifelse(!is.na(avg_b), avg_b, "—"), ifelse(!is.na(sr_b), sr_b, "—"), paste0(dot_b, "%")))
-      )
+      # Bowling mode
+      if (both_batters) {
+        score_df <- tibble(
+          Metric = c("Total Wickets", "Overs Bowled", "Economy Rate", 
+                     "Primary Tournament Runs", "Batting Average", "Strike Rate", 
+                     "Total Boundaries (4s + 6s)", "Boundary Run %", "Matches Played"),
+          `Player A` = as.character(c(0, "0.0", "—", runs_a, ifelse(avg_a > 0, avg_a, "—"), sr_a, fours_a + sixes_a, paste0(bpct_a, "%"), matches_bat_a)),
+          Leader = c(
+            "Tie", "Tie", "Tie",
+            ifelse(runs_a > runs_b, paste("👈", p_a), ifelse(runs_b > runs_a, paste(p_b, "👉"), "Tie")),
+            ifelse(avg_a > avg_b, paste("👈", p_a), ifelse(avg_b > avg_a, paste(p_b, "👉"), "Tie")),
+            ifelse(sr_a > sr_b, paste("👈", p_a), ifelse(sr_b > sr_a, paste(p_b, "👉"), "Tie")),
+            ifelse((fours_a + sixes_a) > (fours_b + sixes_b), paste("👈", p_a), ifelse((fours_b + sixes_b) > (fours_a + sixes_a), paste(p_b, "👉"), "Tie")),
+            ifelse(bpct_a > bpct_b, paste("👈", p_a), ifelse(bpct_b > bpct_a, paste(p_b, "👉"), "Tie")),
+            ifelse(matches_bat_a > matches_bat_b, paste("👈", p_a), ifelse(matches_bat_b > matches_bat_a, paste(p_b, "👉"), "Tie"))
+          ),
+          `Player B` = as.character(c(0, "0.0", "—", runs_b, ifelse(avg_b > 0, avg_b, "—"), sr_b, fours_b + sixes_b, paste0(bpct_b, "%"), matches_bat_b))
+        )
+      } else {
+        score_df <- tibble(
+          Metric = c("Total Wickets", "Runs Conceded", "Legal Balls Bowled", "Economy Rate", "Bowling Average", "Bowling Strike Rate", "Dot-Ball %", "Primary Tournament Runs"),
+          `Player A` = as.character(c(wkts_a, runs_conceded_a, legal_balls_a, ifelse(!is.na(econ_a), econ_a, "—"), ifelse(!is.na(bowl_avg_a), bowl_avg_a, "—"), ifelse(!is.na(bowl_sr_a), bowl_sr_a, "—"), paste0(dot_a, "%"), runs_a)),
+          Leader = c(
+            ifelse(wkts_a > wkts_b, paste("👈", p_a), ifelse(wkts_b > wkts_a, paste(p_b, "👉"), "Tie")),
+            ifelse(runs_conceded_a < runs_conceded_b, paste("👈", p_a), ifelse(runs_conceded_b < runs_conceded_a, paste(p_b, "👉"), "Tie")),
+            ifelse(legal_balls_a > legal_balls_b, paste("👈", p_a), ifelse(legal_balls_b > legal_balls_a, paste(p_b, "👉"), "Tie")),
+            ifelse(!is.na(econ_a) && (is.na(econ_b) || econ_a < econ_b), paste("👈", p_a), ifelse(!is.na(econ_b) && (is.na(econ_a) || econ_b < econ_a), paste(p_b, "👉"), "Tie")),
+            ifelse(!is.na(bowl_avg_a) && (is.na(bowl_avg_b) || bowl_avg_a < bowl_avg_b), paste("👈", p_a), ifelse(!is.na(bowl_avg_b) && (is.na(bowl_avg_a) || bowl_avg_b < bowl_avg_a), paste(p_b, "👉"), "Tie")),
+            ifelse(!is.na(bowl_sr_a) && (is.na(bowl_sr_b) || bowl_sr_a < bowl_sr_b), paste("👈", p_a), ifelse(!is.na(bowl_sr_b) && (is.na(bowl_sr_a) || bowl_sr_b < bowl_sr_a), paste(p_b, "👉"), "Tie")),
+            ifelse(dot_a > dot_b, paste("👈", p_a), ifelse(dot_b > dot_a, paste(p_b, "👉"), "Tie")),
+            ifelse(runs_a > runs_b, paste("👈", p_a), ifelse(runs_b > runs_a, paste(p_b, "👉"), "Tie"))
+          ),
+          `Player B` = as.character(c(wkts_b, runs_conceded_b, legal_balls_b, ifelse(!is.na(econ_b), econ_b, "—"), ifelse(!is.na(bowl_avg_b), bowl_avg_b, "—"), ifelse(!is.na(bowl_sr_b), bowl_sr_b, "—"), paste0(dot_b, "%"), runs_b))
+        )
+      }
     }
     
     colnames(score_df)[2] <- p_a

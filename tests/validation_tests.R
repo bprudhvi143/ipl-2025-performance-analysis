@@ -211,8 +211,24 @@ testServer(server, {
   stopifnot(!is.null(output$plot_comp_radar))
   stopifnot(!is.null(output$table_comp_scorecard))
   
+  # Player Comparison Studio (Batsmen in Bowling Duel: Kohli vs Gill)
+  session$setInputs(comp_player_a_search = "Virat Kohli", comp_player_b_search = "Shubman Gill", comp_mode = "bowling")
+  stopifnot(!is.null(output$comp_content_ui))
+  stopifnot(grepl("Specialist Batter", as.character(output$comp_content_ui$html)))
+  stopifnot(grepl("Tournament Runs", as.character(output$comp_content_ui$html)))
+  stopifnot(!is.null(output$plot_comp_radar))
+  stopifnot(!is.null(output$table_comp_scorecard))
+  stopifnot(!is.null(output$comp_player_b_suggestions_ui))
+  
+  # Player Comparison Studio (Bowlers in Batting Duel: Bumrah vs Prasidh)
+  session$setInputs(comp_player_a_search = "Jasprit Bumrah", comp_player_b_search = "Prasidh", comp_mode = "batting")
+  stopifnot(!is.null(output$comp_content_ui))
+  stopifnot(grepl("Specialist Bowler", as.character(output$comp_content_ui$html)))
+  stopifnot(!is.null(output$plot_comp_radar))
+  stopifnot(!is.null(output$table_comp_scorecard))
+  
   # Player Comparison Studio (Identical selection validation)
-  session$setInputs(comp_player_a = "Kohli", comp_player_b = "Kohli", comp_mode = "batting")
+  session$setInputs(comp_player_a_search = "Kohli", comp_player_b_search = "Kohli", comp_player_a = "Kohli", comp_player_b = "Kohli", comp_mode = "batting")
   stopifnot(!is.null(output$comp_validation_ui))
   
   # Player Analytics: Non-IPL 2025 Player (Instant search + Not Found warning)

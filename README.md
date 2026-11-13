@@ -64,17 +64,25 @@ The platform features a modern dark-themed interface, statistically rigorous cri
 - **Franchise Top 3 Batsmen & Bowlers:** Top performers within the selected squad with individual crests.
 
 ### 4. ⚔️ Player Comparison Studio (Head-to-Head Duel)
-- **Instant Search for Both Players:** Dedicated autocomplete search bars for Player A and Player B with letter-by-letter suggestions.
-- **Cricbuzz Specs on Comparison Cards:** Player roles, batting styles, and bowling styles displayed directly on the head-to-head cards.
+- **Initial Matchup Recommendations (Featured Rivalries Ribbon):** Curated, one-click legendary matchups (*Virat Kohli vs Shubman Gill*, *Sai Sudharsan vs Suryakumar Yadav*, *Jasprit Bumrah vs Prasidh*, *Rashid Khan vs Noor Ahmad*, *Travis Head vs Heinrich Klaasen*, *Rohit Sharma vs KL Rahul*) to load instant comparisons with zero typing.
+- **Dynamic Competing Rival Suggestions for Player B:** Real-time role and leaderboard intelligence that automatically analyzes Player A's profile and dynamically recommends their top 5 closest leaderboard competitors as clickable rival chips directly below Player B's search bar.
+- **Instant Search with Alphabet-by-Alphabet Autocomplete:** Dedicated search controls for Player A and Player B with real-time suggestions across all 2025 players and aliases.
+- **Universal Franchise & Crest Resolution:** Every player displays their authentic franchise crest and official team code across both Batting and Bowling duels, completely eliminating missing team data or placeholder dashes.
+- **Cricbuzz Intelligence on Comparison Cards:** Player roles, batting styles, and bowling styles displayed directly on the head-to-head cards.
+- **Complete Cross-Discipline Data Display (Specialist Batter & Bowler Handling):**
+  - When comparing batsmen in **Bowling Duel** (e.g., *Virat Kohli vs Shubman Gill*), players receive a clear `Specialist Batter • 0 Overs Bowled in 2025` badge, and an informative advisory banner explains the matchup.
+  - Rather than showing blank or empty cards, their **Primary Tournament Batting Benchmarks** (Tournament Runs, Batting Average, Strike Rate, Boundaries, and Matches) are displayed directly on the cards with duel leader highlights.
+  - The polar radar intelligently adapts to plot their **Primary Tournament Impact Profile** so users can evaluate batting dominance on the radar rather than an empty polygon.
+  - The Head-to-Head Scorecard includes both the bowling baseline (0 wickets, 0.0 overs) and granular primary batting metrics with metric leader arrows (`👈 Player A` / `Player B 👉`).
+  - Symmetrically, specialist bowlers compared in **Batting Duel** display their primary credited wickets, economy rate, and bowling averages alongside batting figures.
 - **Non-IPL Player Validation Alert:** Clear alert banner if either Player A or Player B did not play in the 2025 season.
 - **Identical Selection Notice:** Advisory banner when the same player is selected for both sides.
-- **Interactive Matchup:** Compare any two players side-by-side in either **Batting Duel** or **Bowling Duel** mode.
-- **Dynamic Leader Highlighting:** Automatic detection of metric leaders with visual leader badges.
+- **Dynamic Leader Highlighting:** Automatic detection of metric leaders with visual leader badges (`🏆 DUEL LEADER`) and metric highlight glow.
 - **Normalized Multi-Axis Radar Model:** 
   - Standardizes raw performance metrics onto a 0–100 scale based on IPL 2025 season benchmarks.
   - Properly inverts defensive bowling statistics (Economy Rate, Bowling Average, and Bowling Strike Rate) so lower, superior figures yield higher normalized scores.
   - Interactive tooltips display both normalized scores and actual raw statistics simultaneously.
-- **Comprehensive Scorecard Table:** Granular head-to-head comparison with directional leader indicators.
+- **Comprehensive Client-Side Scorecard Table:** Granular head-to-head comparison powered by client-side DataTables (`server = FALSE`) for instant zero-latency rendering with directional leader indicators.
 
 ---
 
