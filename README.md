@@ -9,7 +9,7 @@ An enterprise-grade, interactive sports analytics and cricket intelligence platf
 
 The platform features a modern dark-themed interface, statistically rigorous cricket performance modeling, interactive Plotly visualizations, searchable DataTables, and a head-to-head **Player Comparison Studio** with normalized radar intelligence.
 
-🔗 **Live Application:** [🏏 IPL 2025 Analytics Dashboard](https://vizwithprudhvi.shinyapps.io/datasets/)  
+🔗 **Live Application:** [🏏 IPL 2025 Analytics Dashboard](https://vizualizations.shinyapps.io/ipl-2025-performance-analysis/)  
 📦 **GitHub Repository:** [bprudhvi143/ipl-2025-performance-analysis](https://github.com/bprudhvi143/ipl-2025-performance-analysis)
 
 ---
@@ -269,8 +269,8 @@ To deploy the updated application to your existing live instance:
    ```r
    rsconnect::deployApp(
      appDir = ".",
-     appName = "datasets",
-     account = "vizwithprudhvi",
+     appName = "ipl-2025-performance-analysis",
+     account = "vizualizations",
      forceUpdate = TRUE
    )
    ```
@@ -279,5 +279,5 @@ To deploy the updated application to your existing live instance:
 
 ## 👥 Author & Acknowledgements
 - **Author:** Prudhvi
-- **Live Demo:** [IPL 2025 Analytics Dashboard](https://vizwithprudhvi.shinyapps.io/datasets/)
+- **Live Demo:** [IPL 2025 Analytics Dashboard](https://vizualizations.shinyapps.io/ipl-2025-performance-analysis/)
 - **Data Source:** IPL 2025 Complete Ball-by-Ball Dataset
